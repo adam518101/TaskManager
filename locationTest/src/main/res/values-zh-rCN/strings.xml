@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">AppTest</string>
+    <string name="get_location">获取位置信息</string>
+	<string name="capture">拍 照</string>
+	<string name="sound_record">录 音</string>
+	<string name="select_image">选择照片</string>
+	<string name="select_audio">选择录音</string>
+</resources>

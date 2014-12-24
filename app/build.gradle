@@ -1,0 +1,30 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 20
+    buildToolsVersion "19.1.0"
+
+    defaultConfig {
+        applicationId "com.acmllaugh.taskmanager"
+        minSdkVersion 17
+        targetSdkVersion 20
+        versionCode 1
+        versionName "1.0"
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    buildTypes {
+        release {
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.github.androidprogresslayout:library:1.1@aar'
+    compile 'de.greenrobot:eventbus:2.4.0'
+}
