@@ -55,9 +55,9 @@ public class TaskLoaderCallback implements LoaderManager.LoaderCallbacks<ArrayLi
     }
 
     private void showEmptyView(boolean visiable) {
-        //Utils.log("TaskLoaderCallback:", "set empty view : " + visiable);
+        Utils.log("acmllaugh1:", "set empty view : " + visiable);
         if (mEmptyView == null) {
-            Utils.log("TaskLoaderCallback:", "Empty view is null.");
+            Utils.log("acmllaugh1:", "Empty view is null.");
             return;
         }
         if (visiable) {

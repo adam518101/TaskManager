@@ -25,12 +25,14 @@
         android:layout_below="@id/txt_username_label"
         android:layout_marginTop="10dp"
         android:layout_alignEnd="@id/txt_username_label"
+        android:layout_alignRight="@id/txt_username_label"
         android:text="@string/password"
         android:textSize="@dimen/login_page_txt_size"/>
 
     <EditText
         android:id="@+id/txt_username_input"
         android:layout_toEndOf="@id/txt_username_label"
+        android:layout_toRightOf="@id/txt_username_label"
         android:layout_alignBottom="@id/txt_username_label"
         style="@style/login_edittext_style"
         />
@@ -38,6 +40,7 @@
     <EditText
         android:id="@+id/txt_password_input"
         android:layout_toEndOf="@id/txt_password_label"
+        android:layout_toRightOf="@id/txt_password_label"
         android:layout_alignBottom="@id/txt_password_label"
         android:inputType="textPassword"
         style="@style/login_edittext_style" />
@@ -48,6 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/txt_password_label"
         android:layout_alignStart="@id/txt_password_label"
+        android:layout_alignLeft="@id/txt_password_label"
         android:layout_marginTop="10dp"
         android:textSize="12sp"
         android:text="@string/default_login_hint"
@@ -60,6 +64,7 @@
         android:layout_marginTop="10dp"
         android:layout_below="@id/txt_password_input"
         android:layout_alignEnd="@id/txt_password_input"
+        android:layout_alignRight="@id/txt_password_input"
         android:background="@drawable/selector_login_button"
         android:text="@string/login"
         android:textSize="@dimen/login_page_txt_size"/>

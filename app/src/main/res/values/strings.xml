@@ -40,5 +40,6 @@
     <string name="cancel">Cancel</string>
     <string name="confirm">Confirm</string>
     <string name="net_work_unavailable">Net work is not accessable.</string>
+    <string name="refresh">Refresh</string>
 
 </resources>

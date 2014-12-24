@@ -62,6 +62,7 @@ public class LoginActivity extends Activity {
 
 
     private SharedPreferences mPrefs;
+    private NetworkState mNetWorkState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,12 +79,14 @@ public class LoginActivity extends Activity {
         }
     }
 
-    private void checkNetWorkConnected() {
+    private boolean checkNetWorkConnected() {
         //Check if there is an available network.
-        NetworkState state = Utils.getCurrentNetworkState(getApplicationContext());
-        if (!state.isConnected()) {
+        mNetWorkState = Utils.getCurrentNetworkState(getApplicationContext());
+        if (!mNetWorkState.isConnected()) {
             Utils.showToast(mToast, getString(R.string.net_work_unavailable), this);
+            return false;
         }
+        return true;
     }
 
     private void saveUserID() {
@@ -134,6 +137,10 @@ public class LoginActivity extends Activity {
     private void tryToLogin() {
         //Check if username and password is valid and do login.
         boolean inputCheckResult = checkInput();
+        if (!mNetWorkState.isConnected()) {
+            Utils.showToast(mToast, getString(R.string.net_work_unavailable), this);
+            return;
+        }
         if (inputCheckResult) {
             doLogin();
         }
@@ -214,6 +221,7 @@ public class LoginActivity extends Activity {
     }
 
     public void onEvent(NetworkState state) {
+        mNetWorkState = state;
         if (!state.isConnected()) {
             Utils.showToast(mToast, getString(R.string.net_work_unavailable), this);
         }

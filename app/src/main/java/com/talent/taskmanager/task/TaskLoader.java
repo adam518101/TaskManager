@@ -23,11 +23,14 @@ public class TaskLoader extends AsyncTaskLoader<ArrayList<TaskDto>> {
 
     @Override
     public ArrayList<TaskDto> loadInBackground() {
-       //TODO : connect to server and get all the tasks data.
        int[] status = new int[] { 1, 2, 3 };// 状态
        TaskQueryHandler taskQueryHandler = new TaskQueryHandler();
        TaskQueryResult result = taskQueryHandler.qryTasks(status);
-       return (ArrayList<TaskDto>) result.getTaskList();
+        ArrayList<TaskDto> taskList = (ArrayList<TaskDto>) result.getTaskList();
+        if (taskList == null) {
+            taskList = new ArrayList<TaskDto>();
+        }
+       return taskList;
     }
 
     @Override

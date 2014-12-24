@@ -18,9 +18,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.talent.taskmanager.location.LocationManager;
+import com.talent.taskmanager.network.NetworkState;
 import com.talent.taskmanager.notification.TaskManagerService;
 import com.talent.taskmanager.task.TaskListAdapter;
 import com.coal.black.bc.socket.client.ClientGlobal;
@@ -72,11 +74,13 @@ public class TaskListActivity extends Activity {
     };
     private LocationUI mLocationUI;
     private SharedPreferences mPrefs;
+    private NetworkState mNetWorkState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_list);
+        checkNetWorkConnected();
         Utils.registerToEventBus(this);
         initVariables();
         startNotificationService();
@@ -147,6 +151,9 @@ public class TaskListActivity extends Activity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+        if (!checkNetWorkConnected() && id != R.id.action_log_out) {
+            return super.onOptionsItemSelected(item);
+        }
         switch (id) {
             case R.id.action_sign_in:
                 showProgressDialog();
@@ -162,6 +169,9 @@ public class TaskListActivity extends Activity {
                 break;
             case R.id.action_log_out:
                 confirmLogout();
+                break;
+            case R.id.action_refresh:
+                loadTasks();
                 break;
         }
         if (id == R.id.action_sign_in) {
@@ -291,4 +301,22 @@ public class TaskListActivity extends Activity {
     }
 
 
+    public void onEvent(NetworkState state) {
+        mNetWorkState = state;
+        if (!state.isConnected()) {
+            Utils.showToast(mToast, getString(R.string.net_work_unavailable), this);
+        } else {
+            loadTasks();
+        }
+    }
+
+    private boolean checkNetWorkConnected() {
+        //Check if there is an available network.
+        mNetWorkState = Utils.getCurrentNetworkState(getApplicationContext());
+        if (!mNetWorkState.isConnected()) {
+            Utils.showToast(mToast, getString(R.string.net_work_unavailable), this);
+            return false;
+        }
+        return true;
+    }
 }

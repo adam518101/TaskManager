@@ -7,6 +7,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
+import com.talent.taskmanager.Utils;
+
 import de.greenrobot.event.EventBus;
 
 /**
@@ -17,21 +19,23 @@ public class NetworkStateReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
-        Log.d("acmllaugh1", "onReceive (line 84): network is connected : " + noConnectivity);
-        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(context.CONNECTIVITY_SERVICE);
-        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
-        boolean haveConnectedWifi = false;
-        boolean haveConnectedMobile = false;
-        for (NetworkInfo ni : netInfo) {
-            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
-                if (ni.isConnected())
-                    haveConnectedWifi = true;
-            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
-                if (ni.isConnected())
-                    haveConnectedMobile = true;
-        }
-        NetworkState state = new NetworkState(!noConnectivity, haveConnectedWifi, haveConnectedMobile);
+//        boolean noConnectivity = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+//        Log.d("acmllaugh1", "onReceive (line 84): network is connected : " + noConnectivity);
+//        ConnectivityManager cm = (ConnectivityManager)context.getSystemService(context.CONNECTIVITY_SERVICE);
+//        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+//        boolean haveConnectedWifi = false;
+//        boolean haveConnectedMobile = false;
+//        for (NetworkInfo ni : netInfo) {
+//            if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+//                if (ni.isConnected())
+//                    haveConnectedWifi = true;
+//            if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+//                if (ni.isConnected())
+//                    haveConnectedMobile = true;
+//        }
+//        NetworkState state = new NetworkState(!noConnectivity, haveConnectedWifi, haveConnectedMobile);
+        Log.d("acmllaugh1", "onReceive (line 37): intent action : " + intent.getAction());
+        NetworkState state = Utils.getCurrentNetworkState(context);
         mEventBus.post(state);
     }
 }
