@@ -59,7 +59,7 @@ public class TaskListActivity extends Activity {
             switch (msg.what) {
                 case SIGN_IN_RESULT:
                     if (msg.obj instanceof SignInResult) {
-                        dissmissProgressDialog();
+                        Utils.dissmissProgressDialog(mProcessingDialog);
                         SignInResult result = (SignInResult) msg.obj;
                         Log.d("acmllaugh1", "handleMessage (line 63): sign in result : " + result.isSuccess());
                         if (result.isSuccess()) {
@@ -100,6 +100,9 @@ public class TaskListActivity extends Activity {
 
 
     private void loadTasks() {
+        if (getLoaderManager().getLoader(0) != null) {
+            getLoaderManager().getLoader(0).cancelLoad();
+        }
         getLoaderManager().restartLoader(0, null, mTaskLoaderCallback);
     }
 
@@ -156,7 +159,7 @@ public class TaskListActivity extends Activity {
         }
         switch (id) {
             case R.id.action_sign_in:
-                showProgressDialog();
+                mProcessingDialog = Utils.showProgressDialog(mProcessingDialog, this);
                 if (mUserID != -1) {
                     Thread thread = new Thread(new Runnable() {
                         @Override
@@ -198,10 +201,10 @@ public class TaskListActivity extends Activity {
     }
 
     private void doLogout() {
-        showProgressDialog();
+        mProcessingDialog = Utils.showProgressDialog(mProcessingDialog, this);
         clearSavedUserID();
         tryStopService();
-        dissmissProgressDialog();
+        Utils.dissmissProgressDialog(mProcessingDialog);
         this.finish();
     }
 
@@ -227,7 +230,7 @@ public class TaskListActivity extends Activity {
         Location location = mLocationManager.getCurrentLocation();
         if (location == null) {
             Log.d("acmllaugh1", "doSignIn (line 156): location is null.");
-            dissmissProgressDialog();
+            Utils.dissmissProgressDialog(mProcessingDialog);
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -259,21 +262,6 @@ public class TaskListActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         Utils.unRegisterEventBus(this);
-    }
-
-    private void showProgressDialog() {
-        if (mProcessingDialog == null) {
-            mProcessingDialog = ProgressDialog.show(this, null, getString(R.string.please_wait));
-            mProcessingDialog.setCancelable(false);
-        } else if (!mProcessingDialog.isShowing()) {
-            mProcessingDialog.show();
-        }
-    }
-
-    private void dissmissProgressDialog() {
-        if (mProcessingDialog != null && mProcessingDialog.isShowing()) {
-            mProcessingDialog.dismiss();
-        }
     }
 
     private class LocationUI implements LocationManager.Listener {

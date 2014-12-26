@@ -5,7 +5,8 @@ public enum OperateType {
 	LoginIn((byte) 1), // 登陆
 	SingIn((byte) 2), // 签到
 	TaskQuery((byte) 3), // 接收任务
-	UploadFile((byte) 4);// 上传文件
+	UploadFile((byte) 4), // 上传文件
+	UserTaskStatusChange((byte) 5);// 用户任务的状态改变
 
 	private byte value;
 
@@ -27,6 +28,8 @@ public enum OperateType {
 			return TaskQuery;
 		case 4:
 			return UploadFile;
+		case 5:
+			return UserTaskStatusChange;
 		default:
 			return Error;
 		}

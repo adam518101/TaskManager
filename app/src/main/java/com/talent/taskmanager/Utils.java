@@ -2,6 +2,7 @@ package com.talent.taskmanager;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -94,5 +95,22 @@ public class Utils {
         }
         networkConnected = wifiConnected || mobileConnected;
         return new NetworkState(networkConnected, wifiConnected, mobileConnected);
+    }
+
+
+    public static ProgressDialog showProgressDialog(ProgressDialog dialog, Activity activity) {
+        if (dialog == null) {
+            dialog = ProgressDialog.show(activity, null, activity.getApplicationContext().getString(R.string.please_wait));
+            dialog.setCancelable(false);
+        } else if (!dialog.isShowing()) {
+            dialog.show();
+        }
+        return dialog;
+    }
+
+    public static void dissmissProgressDialog(ProgressDialog dialog) {
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+        }
     }
 }

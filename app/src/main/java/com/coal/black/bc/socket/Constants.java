@@ -29,4 +29,7 @@ public class Constants {
 
 	public static String TASK_QUERY_CODER_TO_WIRE_ERROR = "Task.Query.Coder.To.Wire.Exception";
 	public static String TASK_QUERY_CODER_FORM_WIRE_ERROR = "Task.Query.Coder.from.Wire.Exception";
+
+	public static String USER_TASK_STATUS_CHANGE_CODER_TO_WIRE_ERROR = "User.Task.Status.Change.Coder.To.Wire.Exception";
+	public static String USER_TASK_STATUS_CHANGE_CODER_FORM_WIRE_ERROR = "User.Task.Status.Change.Coder.from.Wire.Exception";
 }

@@ -2,8 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.talent.taskmanager.SingleTaskActivity" >
 
-    <item android:id="@+id/action_sign_in"
-        android:title="@string/save"
+    <item android:id="@+id/action_start_task"
+        android:title="@string/start_task"
         android:orderInCategory="100"
         android:showAsAction="always" />
 

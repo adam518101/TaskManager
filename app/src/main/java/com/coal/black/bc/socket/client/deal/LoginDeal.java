@@ -8,8 +8,8 @@ import java.util.List;
 import com.coal.black.bc.socket.IDtoBase;
 import com.coal.black.bc.socket.client.ClientGlobal;
 import com.coal.black.bc.socket.client.returndto.LoginResult;
-import com.coal.black.bc.socket.coder.ClientInfoCoder;
-import com.coal.black.bc.socket.coder.LoginCoder;
+import com.coal.black.bc.socket.coder.ClientInfoDtoCoder;
+import com.coal.black.bc.socket.coder.LoginDtoCoder;
 import com.coal.black.bc.socket.coder.ServerReturnFlagCoder;
 import com.coal.black.bc.socket.dto.ClientInfoDto;
 import com.coal.black.bc.socket.dto.LoginDto;
@@ -20,9 +20,9 @@ public class LoginDeal {
 	public LoginResult deal(ClientInfoDto clientDto, List<IDtoBase> dtoList, InputStream input, OutputStream output) throws Throwable {
 		try {
 			LoginDto loginDto = (LoginDto) dtoList.get(0);
-			byte[] loginBytes = LoginCoder.toWire(loginDto);
+			byte[] loginBytes = LoginDtoCoder.toWire(loginDto);
 			clientDto.setDataLength(loginBytes.length);
-			byte[] clientBytes = ClientInfoCoder.toWire(clientDto);
+			byte[] clientBytes = ClientInfoDtoCoder.toWire(clientDto);
 
 			output.write(clientBytes);
 			output.write(loginBytes);// 写入登陆的流信息

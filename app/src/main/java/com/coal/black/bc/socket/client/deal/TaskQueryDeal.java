@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.coal.black.bc.socket.IDtoBase;
 import com.coal.black.bc.socket.client.returndto.TaskQueryResult;
-import com.coal.black.bc.socket.coder.ClientInfoCoder;
+import com.coal.black.bc.socket.coder.ClientInfoDtoCoder;
 import com.coal.black.bc.socket.coder.ServerReturnFlagCoder;
 import com.coal.black.bc.socket.coder.TaskDtoListCoder;
 import com.coal.black.bc.socket.coder.TaskQueryDtoCoder;
@@ -22,7 +22,7 @@ public class TaskQueryDeal {
 			byte[] queryTaskBytes = TaskQueryDtoCoder.toWire(queryDto);// 转换为QueryDto信息
 			clientDto.setDataLength(queryTaskBytes.length);
 
-			byte[] clientBytes = ClientInfoCoder.toWire(clientDto);
+			byte[] clientBytes = ClientInfoDtoCoder.toWire(clientDto);
 			out.write(clientBytes);// 向客户端写入clientBytes
 			out.write(queryTaskBytes);// 向客户端写入查询的条件
 			out.flush();
@@ -34,7 +34,25 @@ public class TaskQueryDeal {
 			if (returnFlag.isSuccess()) {
 				int dataLength = returnFlag.getDataLength();// 获取数据的长度
 				byte data[] = new byte[dataLength];
-				in.read(data, 0, dataLength);
+				int length = 0;
+				byte[] dataTemp = new byte[1024];
+				int total = 0;
+				while (true) {
+					length = in.read(dataTemp);
+					if (length == -1) {
+						break;
+					}
+					System.arraycopy(dataTemp, 0, data, total, length);
+					total += length;
+					if (total >= dataLength) {
+						break;
+					}
+				}
+				if (total < dataLength) {
+					System.out.println(dataLength);
+					System.out.println(length);
+					throw new RuntimeException("read exception");
+				}
 				List<TaskDto> taskDtoList = TaskDtoListCoder.fromWire(data);
 				for (TaskDto task : taskDtoList) {
 					result.addTask(task);
@@ -53,6 +71,7 @@ public class TaskQueryDeal {
 			}
 			return result;
 		} catch (Throwable ex) {
+			ex.printStackTrace();
 			TaskQueryResult result = new TaskQueryResult();
 			result.setSuccess(false);
 			result.setBusException(false);

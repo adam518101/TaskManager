@@ -8,7 +8,7 @@ import java.util.List;
 import com.coal.black.bc.socket.IDtoBase;
 import com.coal.black.bc.socket.client.handlers.UploadFileHandler;
 import com.coal.black.bc.socket.client.returndto.UploadFileResult;
-import com.coal.black.bc.socket.coder.ClientInfoCoder;
+import com.coal.black.bc.socket.coder.ClientInfoDtoCoder;
 import com.coal.black.bc.socket.coder.FileDtoCoder;
 import com.coal.black.bc.socket.coder.ServerReturnFlagCoder;
 import com.coal.black.bc.socket.dto.ClientInfoDto;
@@ -24,7 +24,7 @@ public class UploadFileDeal {
 		byte[] fileBytes = FileDtoCoder.toWire(fileDto);
 		clientDto.setDataLength(fileBytes.length);
 
-		byte[] clientBytes = ClientInfoCoder.toWire(clientDto);
+		byte[] clientBytes = ClientInfoDtoCoder.toWire(clientDto);
 
 		out.write(clientBytes);// 向客户端写入用户的信息
 		out.write(fileBytes);// 向客户端写入UploadFileDto信息

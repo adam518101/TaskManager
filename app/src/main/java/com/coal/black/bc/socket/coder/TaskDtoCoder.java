@@ -12,7 +12,7 @@ import com.coal.black.bc.socket.dto.TaskDto;
 import com.coal.black.bc.socket.exception.BusinessException;
 import com.coal.black.bc.socket.utils.StringUtil;
 
-public class TaskCoder {
+public class TaskDtoCoder {
 	public static byte[] toWire(TaskDto task) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		DataOutputStream dout = new DataOutputStream(out);
@@ -107,7 +107,7 @@ public class TaskCoder {
 		int length = 0;
 		byte[] bytes = null;
 		if (StringUtil.isNotEmpty(value)) {
-			bytes = value.trim().getBytes();
+			bytes = value.trim().getBytes("UTF-8");
 			length = bytes.length;
 		}
 		dout.writeInt(length);
@@ -131,7 +131,7 @@ public class TaskCoder {
 		}
 		byte[] bytes = new byte[length];
 		if (length == din.read(bytes, 0, length)) {
-			String s = new String(bytes);
+			String s = new String(bytes, "UTF-8");
 			return s;
 		} else {
 			throw new RuntimeException("The real bytes read length is not same with length " + length);

@@ -21,7 +21,7 @@ public class TestSign {
 		if (loginResult.isSuccess()) {
 			ClientGlobal.userId = loginResult.getUserId();
 
-			for (int i = 0; i < 100; i++) {
+			for (int i = 0; i < 10; i++) {
 				SignInDto signIn = new SignInDto();
 				double jd = Math.abs(random.nextDouble() * 90);
 				signIn.setLatitude(jd);

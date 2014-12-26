@@ -12,8 +12,10 @@ import com.coal.black.bc.socket.client.deal.LoginDeal;
 import com.coal.black.bc.socket.client.deal.SignInDeal;
 import com.coal.black.bc.socket.client.deal.TaskQueryDeal;
 import com.coal.black.bc.socket.client.deal.UploadFileDeal;
+import com.coal.black.bc.socket.client.deal.UserTaskStatusChangeDeal;
 import com.coal.black.bc.socket.client.handlers.UploadFileHandler;
 import com.coal.black.bc.socket.client.returndto.BasicResult;
+import com.coal.black.bc.socket.client.returndto.TaskQueryResult;
 import com.coal.black.bc.socket.dto.ClientInfoDto;
 import com.coal.black.bc.socket.enums.OperateType;
 import com.coal.black.bc.socket.exception.ExceptionBase;
@@ -47,7 +49,7 @@ public class SocketClient {
 		try {
 			socket = new Socket();
 			socket.connect(ClientGlobal.address, ClientGlobal.socketTimeOut);
-			socket.setSoLinger(true, 1);
+			socket.setSoLinger(true, 5);
 			socket.setTcpNoDelay(true);
 			socket.setSoTimeout(ClientGlobal.socketTimeOut);
 			out = socket.getOutputStream();
@@ -65,7 +67,12 @@ public class SocketClient {
 				return new UploadFileDeal().deal(clientDto, objDtoList, in, out, uploadHandler);
 			case TaskQuery:
 				clientDto.setOperateType(OperateType.TaskQuery);
-				return new TaskQueryDeal().deal(clientDto, objDtoList, in, out);
+				TaskQueryResult result = new TaskQueryDeal().deal(clientDto, objDtoList, in, out);
+				out.write(new byte[] { 1 });
+				return result;
+			case UserTaskStatusChange:
+				clientDto.setOperateType(OperateType.UserTaskStatusChange);
+				return new UserTaskStatusChangeDeal().deal(clientDto, objDtoList, in, out);
 			default:
 				break;
 			}

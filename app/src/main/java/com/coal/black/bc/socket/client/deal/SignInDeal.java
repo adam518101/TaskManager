@@ -7,9 +7,9 @@ import java.util.List;
 
 import com.coal.black.bc.socket.IDtoBase;
 import com.coal.black.bc.socket.client.returndto.SignInResult;
-import com.coal.black.bc.socket.coder.ClientInfoCoder;
+import com.coal.black.bc.socket.coder.ClientInfoDtoCoder;
 import com.coal.black.bc.socket.coder.ServerReturnFlagCoder;
-import com.coal.black.bc.socket.coder.SignInCoder;
+import com.coal.black.bc.socket.coder.SignInDtoCoder;
 import com.coal.black.bc.socket.dto.ClientInfoDto;
 import com.coal.black.bc.socket.dto.ServerReturnFlagDto;
 import com.coal.black.bc.socket.dto.SignInDto;
@@ -24,10 +24,10 @@ public class SignInDeal {
 	public SignInResult deal(ClientInfoDto clientDto, List<IDtoBase> dtoList, InputStream input, OutputStream output) {
 		try {
 			clientDto.setDataLength(dtoList.size() * SignInDto.bytesLength);
-			byte[] clientBytes = ClientInfoCoder.toWire(clientDto);
+			byte[] clientBytes = ClientInfoDtoCoder.toWire(clientDto);
 			output.write(clientBytes);
 			for (IDtoBase dto : dtoList) {
-				byte[] signInbytes = SignInCoder.toWire((SignInDto) dto);
+				byte[] signInbytes = SignInDtoCoder.toWire((SignInDto) dto);
 				output.write(signInbytes);
 			}
 			byte[] serverFlageBytes = new byte[ServerReturnFlagDto.bytesLength];

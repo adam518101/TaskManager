@@ -11,7 +11,7 @@ import com.coal.black.bc.socket.dto.ClientInfoDto;
 import com.coal.black.bc.socket.enums.OperateType;
 import com.coal.black.bc.socket.exception.BusinessException;
 
-public class ClientInfoCoder {
+public class ClientInfoDtoCoder {
 	public static byte[] toWire(ClientInfoDto clientInfo) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		DataOutputStream dout = new DataOutputStream(out);

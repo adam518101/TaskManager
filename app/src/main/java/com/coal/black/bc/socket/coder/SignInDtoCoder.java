@@ -11,7 +11,7 @@ import com.coal.black.bc.socket.dto.SignInDto;
 import com.coal.black.bc.socket.enums.SignInType;
 import com.coal.black.bc.socket.exception.BusinessException;
 
-public class SignInCoder {
+public class SignInDtoCoder {
 	/**
 	 * 把SignIn转换为字节流
 	 * 

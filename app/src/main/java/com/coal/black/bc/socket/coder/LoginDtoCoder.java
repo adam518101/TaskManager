@@ -8,7 +8,7 @@ import com.coal.black.bc.socket.dto.LoginDto;
  * @author wanghui-bc
  *
  */
-public class LoginCoder {
+public class LoginDtoCoder {
 	public static byte[] toWire(LoginDto loginDto) {
 		byte[] userCodeBytes = loginDto.getUserCode().getBytes();// 获取用户Coder对应的字节数目
 		byte[] pwdBytes = loginDto.getMd5Pwd().getBytes();

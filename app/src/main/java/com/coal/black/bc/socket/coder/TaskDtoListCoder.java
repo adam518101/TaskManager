@@ -26,7 +26,7 @@ public class TaskDtoListCoder {
 			int length = taskList.size();
 			dout.writeInt(length);
 			for (TaskDto taskDto : taskList) {
-				byte[] bytes = TaskCoder.toWire(taskDto);
+				byte[] bytes = TaskDtoCoder.toWire(taskDto);
 				dout.writeInt(bytes.length);
 				dout.write(bytes);
 			}
@@ -60,7 +60,7 @@ public class TaskDtoListCoder {
 						throw new BusinessException(Constants.TASK_LIST_CODER_FORM_WIRE_ERROR, new RuntimeException(
 								"The read length is not same as the real length"));
 					}
-					TaskDto taskDto = TaskCoder.fromWire(dtoBytes);
+					TaskDto taskDto = TaskDtoCoder.fromWire(dtoBytes);
 					taskDtoList.add(taskDto);
 				}
 			}
