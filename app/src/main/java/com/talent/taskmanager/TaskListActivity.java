@@ -18,13 +18,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.talent.taskmanager.location.LocationManager;
-import com.talent.taskmanager.network.NetworkState;
-import com.talent.taskmanager.notification.TaskManagerService;
-import com.talent.taskmanager.task.TaskListAdapter;
 import com.coal.black.bc.socket.client.ClientGlobal;
 import com.coal.black.bc.socket.client.handlers.UserSignHandler;
 import com.coal.black.bc.socket.client.returndto.LoginResult;
@@ -33,6 +28,10 @@ import com.coal.black.bc.socket.dto.SignInDto;
 import com.coal.black.bc.socket.dto.TaskDto;
 import com.coal.black.bc.socket.enums.SignInType;
 import com.github.androidprogresslayout.ProgressLayout;
+import com.talent.taskmanager.location.LocationManager;
+import com.talent.taskmanager.network.NetworkState;
+import com.talent.taskmanager.notification.TaskManagerService;
+import com.talent.taskmanager.task.TaskListAdapter;
 
 import java.util.ArrayList;
 
@@ -47,7 +46,6 @@ public class TaskListActivity extends Activity {
     private TaskListAdapter mTaskListAdapter;
     private ProgressLayout mProgressLayout;
     private EventBus mEventBus = EventBus.getDefault();
-    private LoginResult mLoginResult;
     private UserSignHandler mSignInHandler = new UserSignHandler();
     private int mUserID;
     private ProgressDialog mProcessingDialog;

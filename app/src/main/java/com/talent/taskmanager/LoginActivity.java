@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -16,22 +15,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.talent.taskmanager.network.NetworkState;
 import com.coal.black.bc.socket.client.handlers.UserLoginHandler;
 import com.coal.black.bc.socket.client.returndto.LoginResult;
+import com.talent.taskmanager.network.NetworkState;
 
 import de.greenrobot.event.EventBus;
 
 
 public class LoginActivity extends Activity {
 
-    private static final int LOGIN_SUCCESS = 0;
-    private static final int LOGIN_FAIL_WRONG_INFO = 1;
-    private static final int LOGIN_FAIL_BAD_NETWORK = 2;
     private EditText mUsernameTextView;
     private EditText mPasswordTextView;
     private Button mLoginButton;
-    private TextWatcher mTextWatcher;
     private Toast mToast = null;
     private String mUsername;
     private String mPassword;
@@ -60,7 +55,6 @@ public class LoginActivity extends Activity {
     };
 
 
-
     private SharedPreferences mPrefs;
     private NetworkState mNetWorkState;
 
@@ -73,7 +67,7 @@ public class LoginActivity extends Activity {
             setContentView(R.layout.activity_login);
             checkUpdate();
             initMembers();
-        }else{
+        } else {
             startTaskListActivity(mUserID);
             this.finish();
         }

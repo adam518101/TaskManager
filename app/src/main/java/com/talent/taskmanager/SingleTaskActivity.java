@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,9 +17,9 @@ import com.coal.black.bc.socket.client.ClientGlobal;
 import com.coal.black.bc.socket.client.handlers.UserTaskStatusChangeHandler;
 import com.coal.black.bc.socket.client.returndto.UserTaskStatusChangeResult;
 import com.coal.black.bc.socket.common.UserTaskStatusCommon;
+import com.coal.black.bc.socket.dto.TaskDto;
 import com.talent.taskmanager.network.NetworkState;
 import com.talent.taskmanager.task.TaskDetailDialog;
-import com.coal.black.bc.socket.dto.TaskDto;
 
 import de.greenrobot.event.EventBus;
 
@@ -34,7 +33,7 @@ public class SingleTaskActivity extends Activity {
     private AlertDialog mDetailDialog;
     private ProgressDialog mProgressDialog;
     private Toast mToast;
-    private Handler mTaskStatusHandler = new Handler(){
+    private Handler mTaskStatusHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             Log.d("acmllaugh1", "handleMessage (line 38): get task result.");
@@ -44,7 +43,7 @@ public class SingleTaskActivity extends Activity {
                 if (result.isSuccess()) {
                     mTask.setTaskStatus(msg.arg1);
                     Utils.showToast(mToast, "Task status changed.", getApplicationContext());
-                }else {
+                } else {
                     Utils.showToast(mToast, "Change task status failed.", getApplicationContext());
                 }
             }
@@ -144,8 +143,9 @@ public class SingleTaskActivity extends Activity {
         unRegisterEventBus();
     }
 
-    /***
+    /**
      * Receive TaskDTO object from task list activity.
+     *
      * @param task
      */
     public void onEvent(TaskDto task) {
