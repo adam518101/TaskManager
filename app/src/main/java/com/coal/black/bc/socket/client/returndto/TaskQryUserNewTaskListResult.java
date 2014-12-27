@@ -5,20 +5,14 @@ import java.util.List;
 
 import com.coal.black.bc.socket.dto.TaskDto;
 
-/**
- * 查询任务返回的结果列表
- * 
- * @author wanghui-bc
- *
- */
-public class TaskQueryResult extends BasicResult {
+public class TaskQryUserNewTaskListResult extends BasicResult {
 	private List<TaskDto> taskList = new ArrayList<TaskDto>();
 
-	public TaskQueryResult() {
+	public TaskQryUserNewTaskListResult() {
 
 	}
 
-	public TaskQueryResult(BasicResult basicResult) {
+	public TaskQryUserNewTaskListResult(BasicResult basicResult) {
 		setSuccess(basicResult.isSuccess());
 		setBusException(basicResult.isBusException());
 		setBusinessErrorCode(basicResult.getBusinessErrorCode());

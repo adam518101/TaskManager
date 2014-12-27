@@ -31,6 +31,8 @@ public class TaskDto extends IDtoBase {
 	private boolean isValid = false;
 	private Integer taskStatus = 0;
 	private Integer userTaskStatus = 0;
+	private Long grantTime = 0L;// 任务授予的时间
+	private Long operateTime = 0L;// 任务操作的时间
 
 	public Integer getId() {
 		return id;
@@ -114,10 +116,6 @@ public class TaskDto extends IDtoBase {
 
 	public int getVisitTimes() {
 		return visitTimes;
-	}
-
-	public void setVisitTimes(int visitTimes) {
-		this.visitTimes = visitTimes;
 	}
 
 	public String getVisitReason() {
@@ -232,6 +230,26 @@ public class TaskDto extends IDtoBase {
 		this.name = name;
 	}
 
+	public Long getGrantTime() {
+		return grantTime;
+	}
+
+	public void setGrantTime(Long grantTime) {
+		this.grantTime = grantTime;
+	}
+
+	public Long getOperateTime() {
+		return operateTime;
+	}
+
+	public void setOperateTime(Long operateTime) {
+		this.operateTime = operateTime;
+	}
+
+	public void setVisitTimes(Integer visitTimes) {
+		this.visitTimes = visitTimes;
+	}
+
 	@Override
 	public String toString() {
 		return "TaskDto [id=" + id + ", bank=" + bank + ", caseID=" + caseID + ", name=" + name + ", identityCard=" + identityCard + ", bankCard=" + bankCard
@@ -239,6 +257,6 @@ public class TaskDto extends IDtoBase {
 				+ region + ", visitTimes=" + visitTimes + ", visitReason=" + visitReason + ", requirement=" + requirement + ", memo=" + memo + ", contactInfo="
 				+ contactInfo + ", companyName=" + companyName + ", visitReport=" + visitReport + ", estimateVisitDate=" + estimateVisitDate
 				+ ", realVisitDate=" + realVisitDate + ", returnTime=" + returnTime + ", realVisitUser=" + realVisitUser + ", isValid=" + isValid
-				+ ", taskStatus=" + taskStatus + ", userTaskStatus=" + userTaskStatus + "]";
+				+ ", taskStatus=" + taskStatus + ", userTaskStatus=" + userTaskStatus + ", grantTime=" + grantTime + ", operateTime=" + operateTime + "]";
 	}
 }

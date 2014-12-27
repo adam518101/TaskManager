@@ -2,7 +2,9 @@ package com.talent.taskmanager;
 
 import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Loader;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -25,6 +27,7 @@ public class TaskLoaderCallback implements LoaderManager.LoaderCallbacks<ArrayLi
     private ListView mTaskList;
     private ArrayAdapter mAdapter;
     private ProgressLayout mProgressLayout;
+    private SharedPreferences mPrefs;
 
     public TaskLoaderCallback(Activity activity, ListView taskListView, ArrayAdapter adapter) {
         mActivity = activity;
@@ -50,8 +53,16 @@ public class TaskLoaderCallback implements LoaderManager.LoaderCallbacks<ArrayLi
             mAdapter.addAll(tasks);
             mAdapter.notifyDataSetChanged();
             showEmptyView(tasks.size() < 1);
+            saveLoadTime();
         }
         displayProgress(false);
+    }
+
+    private void saveLoadTime() {
+        mPrefs = mActivity.getSharedPreferences(Constants.TASK_MANAGER, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = mPrefs.edit();
+        editor.putLong(Constants.LAST_REFRESH_TIME, System.currentTimeMillis());
+        editor.apply();
     }
 
     private void showEmptyView(boolean visiable) {

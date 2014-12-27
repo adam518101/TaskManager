@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -16,6 +17,9 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.coal.black.bc.socket.client.handlers.TaskQryUserNewTaskHandler;
+import com.coal.black.bc.socket.client.returndto.TaskQryUserNewTaskCountResult;
+import com.coal.black.bc.socket.client.returndto.TaskQryUserNewTaskListResult;
 import com.talent.taskmanager.Constants;
 import com.talent.taskmanager.R;
 import com.talent.taskmanager.location.LocationManager;
@@ -41,6 +45,7 @@ public class TaskManagerService extends Service {
     private ArrayList<SignInDto> mRecordedLocations;
     private int mUpdateCountDown;
     private boolean mLastUpdateSuccess;
+    private SharedPreferences mPrefs;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -106,9 +111,11 @@ public class TaskManagerService extends Service {
 //            }
             try {
                 while (true) {
-                    updateLocationInformation();
-                    getNewTasks();
                     Thread.sleep(60000);
+                    updateLocationInformation();
+//                    if (!isTaskListInFront()) {
+                    getNewTasks();
+//                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -125,6 +132,19 @@ public class TaskManagerService extends Service {
 
     private void getNewTasks() {
         // We check if there is a new task.
+        long lashRefreshTime = getLastRefreshTime();
+        TaskQryUserNewTaskHandler handler = new TaskQryUserNewTaskHandler();
+        TaskQryUserNewTaskCountResult countResult = handler.qryNewTaskCount(lashRefreshTime);
+        if (countResult.isSuccess() && countResult.getCount() > 0) {
+            showNotification(countResult.getCount());
+        } else {
+            Log.d("acmllaugh1", "refresh task failed." +countResult.getThrowable().getMessage());
+        }
+    }
+
+    private long getLastRefreshTime() {
+        mPrefs = getSharedPreferences(Constants.TASK_MANAGER, MODE_PRIVATE);
+        return mPrefs.getLong(Constants.LAST_REFRESH_TIME, 0);
     }
 
     private void updateLocationInformation() {

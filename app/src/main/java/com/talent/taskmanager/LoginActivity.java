@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.coal.black.bc.socket.client.handlers.UserLoginHandler;
@@ -34,12 +35,13 @@ public class LoginActivity extends Activity {
     private LoginResult mLoginResult;
     private int mUserID;
     private EventBus mEventBus = EventBus.getDefault();
+    private SharedPreferences mPrefs;
+    private NetworkState mNetWorkState;
     private Handler mLoginHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             hideProcessDialog();
             if (mLoginResult.isSuccess()) {
-//                Log.d("acmllaugh1", "login (line 27): login user id : " + mLoginResult.getUserId());
                 mUserID = mLoginResult.getUserId();
                 saveUserID();
                 startTaskListActivity(mUserID);
@@ -49,14 +51,13 @@ public class LoginActivity extends Activity {
                     Utils.showToast(mToast, getString(R.string.login_fail_wrong_info), LoginActivity.this);
                 } else {
                     Log.d("acmllaugh1", "login (line 34): other exception : " + mLoginResult.getThrowable());
+                    Utils.showToast(mToast, getString(R.string.connection_out_of_time), LoginActivity.this);
                 }
             }
         }
     };
+    private TextView mAppTitleTextView;
 
-
-    private SharedPreferences mPrefs;
-    private NetworkState mNetWorkState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,9 +103,18 @@ public class LoginActivity extends Activity {
         mUsernameTextView = (EditText) findViewById(R.id.txt_username_input);
         mPasswordTextView = (EditText) findViewById(R.id.txt_password_input);
         mLoginButton = (Button) findViewById(R.id.btn_login);
+        mAppTitleTextView = (TextView) findViewById(R.id.txt_app_title);
+        showUpAppTitle();
         addListener(mUsernameTextView.getId());
         addListener(mPasswordTextView.getId());
         addListener(mLoginButton.getId());
+    }
+
+    private void showUpAppTitle() {
+        mAppTitleTextView.clearAnimation();
+        mAppTitleTextView.setAlpha(0);
+        mAppTitleTextView.animate().alphaBy(1).setDuration(1500).start();
+        mAppTitleTextView.setVisibility(View.VISIBLE);
     }
 
     private void addListener(int id) {

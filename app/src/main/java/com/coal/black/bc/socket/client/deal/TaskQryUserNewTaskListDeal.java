@@ -5,22 +5,22 @@ import java.io.OutputStream;
 import java.util.List;
 
 import com.coal.black.bc.socket.IDtoBase;
-import com.coal.black.bc.socket.client.returndto.TaskQueryResult;
+import com.coal.black.bc.socket.client.returndto.TaskQryUserNewTaskListResult;
 import com.coal.black.bc.socket.coder.ClientInfoDtoCoder;
 import com.coal.black.bc.socket.coder.ServerReturnFlagCoder;
 import com.coal.black.bc.socket.coder.TaskDtoListCoder;
-import com.coal.black.bc.socket.coder.TaskQueryDtoCoder;
+import com.coal.black.bc.socket.coder.TaskQryUserNewTaskDtoCoder;
 import com.coal.black.bc.socket.dto.ClientInfoDto;
 import com.coal.black.bc.socket.dto.ServerReturnFlagDto;
 import com.coal.black.bc.socket.dto.TaskDto;
-import com.coal.black.bc.socket.dto.TaskQueryDto;
+import com.coal.black.bc.socket.dto.TaskQryUserNewTaskDto;
 import com.coal.black.bc.socket.utils.InputStreamUtils;
 
-public class TaskQueryDeal {
-	public TaskQueryResult deal(ClientInfoDto clientDto, List<IDtoBase> dtoList, InputStream in, OutputStream out) {
+public class TaskQryUserNewTaskListDeal {
+	public TaskQryUserNewTaskListResult deal(ClientInfoDto clientDto, List<IDtoBase> dtoList, InputStream in, OutputStream out) {
 		try {
-			TaskQueryDto queryDto = (TaskQueryDto) dtoList.get(0);
-			byte[] queryTaskBytes = TaskQueryDtoCoder.toWire(queryDto);// 转换为QueryDto信息
+			TaskQryUserNewTaskDto queryDto = (TaskQryUserNewTaskDto) dtoList.get(0);
+			byte[] queryTaskBytes = TaskQryUserNewTaskDtoCoder.toWire(queryDto);// 转换为QueryDto信息
 			clientDto.setDataLength(queryTaskBytes.length);
 
 			byte[] clientBytes = ClientInfoDtoCoder.toWire(clientDto);
@@ -30,7 +30,7 @@ public class TaskQueryDeal {
 
 			byte[] serverFlageBytes = InputStreamUtils.readFixedLengthData(ServerReturnFlagDto.bytesLength, in);// 获取服务器端的数据
 			ServerReturnFlagDto returnFlag = ServerReturnFlagCoder.fromWire(serverFlageBytes);
-			TaskQueryResult result = new TaskQueryResult();
+			TaskQryUserNewTaskListResult result = new TaskQryUserNewTaskListResult();
 			if (returnFlag.isSuccess()) {
 				int dataLength = returnFlag.getDataLength();// 获取数据的长度
 				byte data[] = InputStreamUtils.readFixedLengthData(dataLength, in);// 直接读取数据
@@ -42,7 +42,6 @@ public class TaskQueryDeal {
 				result.setSuccess(true);
 				result.setBusinessErrorCode((byte) -1);
 				result.setThrowable(null);
-				return result;
 			} else {
 				result.setSuccess(false);
 				result.setBusException(returnFlag.isBusinessException());
@@ -52,7 +51,7 @@ public class TaskQueryDeal {
 			}
 			return result;
 		} catch (Throwable ex) {
-			TaskQueryResult result = new TaskQueryResult();
+			TaskQryUserNewTaskListResult result = new TaskQryUserNewTaskListResult();
 			result.setSuccess(false);
 			result.setBusException(false);
 			result.setBusinessErrorCode((byte) -1);

@@ -10,7 +10,7 @@ public class TestUserStatusChangeHanlder {
 		ClientGlobal.userId = 11;
 
 		UserTaskStatusChangeHandler handler = new UserTaskStatusChangeHandler();
-		UserTaskStatusChangeResult result = handler.changeUserTaskStatus(1, UserTaskStatusCommon.IN_DEALING);
+		UserTaskStatusChangeResult result = handler.changeUserTaskStatus(1, UserTaskStatusCommon.HAS_COMMITED);
 		if (result.isSuccess()) {
 			System.out.println("Success");
 		} else {

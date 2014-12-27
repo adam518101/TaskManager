@@ -39,7 +39,7 @@ public class TaskDetailDialog extends AlertDialog {
 
     protected void onCreate(Bundle savedInstanceState) {
         mView = getLayoutInflater().inflate(R.layout.task_detail_dialog, null);
-        setIcon(R.drawable.ic_launcher);
+        //setIcon(R.drawable.ic_launcher);
         setTitle(mTask.getVisitReason());
 
         ((TextView) mView.findViewById(R.id.detail_person_name))
@@ -47,6 +47,10 @@ public class TaskDetailDialog extends AlertDialog {
         ((TextView) mView.findViewById(R.id.detail_task_address))
                 .setText(mTask.getAddress());
         ((TextView) mView.findViewById(R.id.detail_task_contact_info)).setText(mTask.getContactInfo());
+        ((TextView) mView.findViewById(R.id.detail_task_identity_card)).setText(mTask.getIdentityCard());
+        ((TextView) mView.findViewById(R.id.detail_task_bank_card)).setText(mTask.getBankCard());
+        ((TextView) mView.findViewById(R.id.detail_task_case_amount)).setText(Double.toString(mTask.getCaseAmount()));
+        ((TextView) mView.findViewById(R.id.detail_task_has_payed)).setText(Double.toString(mTask.getHasPayed()));
 
         setView(mView);
         setButton(BUTTON_NEGATIVE, mContext.getString(R.string.confirm_know), (DialogInterface.OnClickListener) null);

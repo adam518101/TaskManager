@@ -42,5 +42,11 @@
     <string name="net_work_unavailable">Net work is not accessable.</string>
     <string name="refresh">Refresh</string>
     <string name="start_task">Start Task</string>
+    <string name="app_login_title">Outside Task Assistant</string>
+    <string name="connection_out_of_time">Connection ran out of time, please try latter again.</string>
+    <string name="identity_card">Identity Card:</string>
+    <string name="bankCard">Bank Card:</string>
+    <string name="case_amount">Case Amount:</string>
+    <string name="has_payed">Has Paid:</string>
 
 </resources>

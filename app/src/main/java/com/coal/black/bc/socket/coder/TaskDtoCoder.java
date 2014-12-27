@@ -14,10 +14,13 @@ import com.coal.black.bc.socket.utils.StringUtil;
 
 public class TaskDtoCoder {
 	public static byte[] toWire(TaskDto task) {
+		if (task == null) {
+			return new byte[0];
+		}
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		DataOutputStream dout = new DataOutputStream(out);
 		try {
-			dout.writeInt(task.getId());// 写入ID
+			writeIntegerData(task.getId(), dout);// 写入用户id
 
 			writeStringData(task.getBank(), dout);// 写入银行
 			writeStringData(task.getCaseID(), dout);// 写入个案序列号
@@ -25,14 +28,14 @@ public class TaskDtoCoder {
 			writeStringData(task.getIdentityCard(), dout);// 写入身份证号
 			writeStringData(task.getBankCard(), dout);// 写入银行卡号
 
-			dout.writeDouble(task.getCaseAmount());// 写入委案金额
-			dout.writeDouble(task.getHasPayed());// 写入已还款
+			writeDoubleData(task.getCaseAmount(), dout);// 写入委案金额
+			writeDoubleData(task.getHasPayed(), dout);// 写入已还款
 
 			writeStringData(task.getNoticeStatement(), dout);// 催款状态
 			writeStringData(task.getAddress(), dout);// 写入地址
 			writeStringData(task.getRegion(), dout);// 写入地区
 
-			dout.writeInt(task.getVisitTimes());// 写入访问期次
+			writeIntegerData(task.getVisitTimes(), dout);// 写入访问次数
 
 			writeStringData(task.getVisitReason(), dout);// 写入外访原因
 			writeStringData(task.getRequirement(), dout);// 写入要求
@@ -45,10 +48,13 @@ public class TaskDtoCoder {
 			writeDate(task.getRealVisitDate(), dout);// 写入实际访问日期
 			writeDate(task.getReturnTime(), dout);// 写入实际返回时间
 
-			dout.writeInt(task.getRealVisitUser());// 写入实际访问人
-			dout.writeBoolean(task.isValid());
-			dout.writeInt(task.getTaskStatus());
-			dout.writeInt(task.getUserTaskStatus());
+			writeIntegerData(task.getRealVisitUser(), dout);// 写入实际访问人
+			writeBooleanData(task.isValid(), dout);// 写入状态信息
+			writeIntegerData(task.getTaskStatus(), dout);// 写入实际访问人
+			writeIntegerData(task.getUserTaskStatus(), dout);// 写入实际访问人
+
+			writeLongData(task.getGrantTime(), dout);// 授权时间
+			writeLongData(task.getOperateTime(), dout);// 操作时间
 		} catch (IOException ex) {
 			throw new BusinessException(Constants.TASK_CODER_TO_WIRE_ERROR, ex);
 		}
@@ -56,6 +62,9 @@ public class TaskDtoCoder {
 	}
 
 	public static TaskDto fromWire(byte[] bytes) {
+		if (bytes == null || bytes.length <= 0) {
+			return null;
+		}
 		TaskDto taskDto = new TaskDto();
 		ByteArrayInputStream in = new ByteArrayInputStream(bytes);
 		DataInputStream din = new DataInputStream(in);
@@ -97,6 +106,8 @@ public class TaskDtoCoder {
 			taskDto.setValid(din.readBoolean());// 读取是否有效
 			taskDto.setTaskStatus(din.readInt());// 设置任务的状态
 			taskDto.setUserTaskStatus(din.readInt());// 设置用户任务状态
+			taskDto.setGrantTime(din.readLong());
+			taskDto.setOperateTime(din.readLong());
 		} catch (IOException ex) {
 			throw new BusinessException(Constants.TASK_CODER_FORM_WIRE_ERROR, ex);
 		}
@@ -122,6 +133,34 @@ public class TaskDtoCoder {
 			time = date.getTime();
 		}
 		dout.writeLong(time);
+	}
+
+	private static void writeIntegerData(Integer value, DataOutputStream dout) throws IOException {
+		if (value == null) {
+			value = 0;
+		}
+		dout.writeInt(value);
+	}
+
+	private static void writeDoubleData(Double value, DataOutputStream dout) throws IOException {
+		if (value == null) {
+			value = 0D;
+		}
+		dout.writeDouble(value);
+	}
+
+	private static void writeLongData(Long value, DataOutputStream dout) throws IOException {
+		if (value == null) {
+			value = 0L;
+		}
+		dout.writeLong(value);
+	}
+
+	private static void writeBooleanData(Boolean value, DataOutputStream dout) throws IOException {
+		if (value == null) {
+			value = false;
+		}
+		dout.writeBoolean(value);
 	}
 
 	private static String getStringData(DataInputStream din) throws IOException {

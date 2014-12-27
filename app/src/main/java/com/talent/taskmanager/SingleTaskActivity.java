@@ -40,6 +40,7 @@ public class SingleTaskActivity extends Activity {
             Utils.dissmissProgressDialog(mProgressDialog);
             if (msg.obj instanceof UserTaskStatusChangeResult) {
                 UserTaskStatusChangeResult result = (UserTaskStatusChangeResult) msg.obj;
+                //TODO : Whether success or not, reload task from server(but consider a min time for reload task).
                 if (result.isSuccess()) {
                     mTask.setTaskStatus(msg.arg1);
                     Utils.showToast(mToast, "Task status changed.", getApplicationContext());
@@ -103,10 +104,10 @@ public class SingleTaskActivity extends Activity {
     }
 
     private void startTask() {
-        tryChangeTaskStatus(UserTaskStatusCommon.IN_DEALING);
+        changeTaskStatus(UserTaskStatusCommon.IN_DEALING);
     }
 
-    private void tryChangeTaskStatus(final int targetStatus) {
+    private void changeTaskStatus(final int targetStatus) {
         NetworkState state = Utils.getCurrentNetworkState(this.getApplicationContext());
         if (!state.isConnected()) {
             Utils.dissmissProgressDialog(mProgressDialog);

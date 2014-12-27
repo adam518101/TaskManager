@@ -15,6 +15,7 @@ import com.coal.black.bc.socket.dto.ClientInfoDto;
 import com.coal.black.bc.socket.dto.LoginDto;
 import com.coal.black.bc.socket.dto.ServerReturnFlagDto;
 import com.coal.black.bc.socket.utils.DataUtil;
+import com.coal.black.bc.socket.utils.InputStreamUtils;
 
 public class LoginDeal {
 	public LoginResult deal(ClientInfoDto clientDto, List<IDtoBase> dtoList, InputStream input, OutputStream output) throws Throwable {
@@ -28,14 +29,12 @@ public class LoginDeal {
 			output.write(loginBytes);// 写入登陆的流信息
 			output.flush();
 
-			byte[] serverFlageBytes = new byte[ServerReturnFlagDto.bytesLength];
-			input.read(serverFlageBytes, 0, ServerReturnFlagDto.bytesLength);
+			byte[] serverFlageBytes = InputStreamUtils.readFixedLengthData(ServerReturnFlagDto.bytesLength, input);// 获取返回结果
 			ServerReturnFlagDto returnFlag = ServerReturnFlagCoder.fromWire(serverFlageBytes);
 			LoginResult loginResult = new LoginResult();
 			if (returnFlag.isSuccess()) {
-				byte[] userIds = new byte[4];
-				input.read(userIds, 0, 4);
-				int userId = DataUtil.bytes2Int(userIds);
+				byte[] userIdBytes = InputStreamUtils.readFixedLengthData(4, input);// 获取用户ID的字节数组
+				int userId = DataUtil.bytes2Int(userIdBytes);
 				if (userId > 0) {
 					ClientGlobal.userId = userId;
 				}

@@ -9,7 +9,7 @@ import com.coal.black.bc.socket.dto.UploadFileDto;
 
 public class TestUploadFile {
 	public static void main(String[] args) {
-		File f = new File("D:\\Wildlife.wmv");
+		File f = new File("D:\\Desert.jpg");
 		UploadFileDto fileDto = new UploadFileDto();
 		fileDto.setClientFile(f);
 		fileDto.setTaskId(1);

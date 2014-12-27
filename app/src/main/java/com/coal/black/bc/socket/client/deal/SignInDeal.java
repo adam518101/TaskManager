@@ -13,6 +13,7 @@ import com.coal.black.bc.socket.coder.SignInDtoCoder;
 import com.coal.black.bc.socket.dto.ClientInfoDto;
 import com.coal.black.bc.socket.dto.ServerReturnFlagDto;
 import com.coal.black.bc.socket.dto.SignInDto;
+import com.coal.black.bc.socket.utils.InputStreamUtils;
 
 /**
  * SignIn的客户端通信
@@ -30,13 +31,11 @@ public class SignInDeal {
 				byte[] signInbytes = SignInDtoCoder.toWire((SignInDto) dto);
 				output.write(signInbytes);
 			}
-			byte[] serverFlageBytes = new byte[ServerReturnFlagDto.bytesLength];
-			input.read(serverFlageBytes, 0, ServerReturnFlagDto.bytesLength);
+			byte[] serverFlageBytes = InputStreamUtils.readFixedLengthData(ServerReturnFlagDto.bytesLength, input);// 获取服务器返回的数据信息
 			ServerReturnFlagDto returnFlag = ServerReturnFlagCoder.fromWire(serverFlageBytes);
 			SignInResult result = new SignInResult();
 			if (returnFlag.isSuccess()) {
-				byte[] returnBytes = new byte[returnFlag.getDataLength()];
-				input.read(returnBytes, 0, returnFlag.getDataLength());
+				byte[] returnBytes = InputStreamUtils.readFixedLengthData(returnFlag.getDataLength(), input);// 获取返回数据信息
 				result.setSuccess(true);
 				result.setBusException(false);
 				result.setBusinessErrorCode((byte) -1);

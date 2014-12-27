@@ -16,4 +16,5 @@ public interface Constants {
     public static final String SAVED_USER_ID = "saved_user_id";
     public static final int INVALIDATE_USER_ID = -1;
 
+    public static final String LAST_REFRESH_TIME = "last_refresh_time";
 }

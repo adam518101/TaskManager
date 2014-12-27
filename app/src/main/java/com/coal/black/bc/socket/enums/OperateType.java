@@ -6,7 +6,10 @@ public enum OperateType {
 	SingIn((byte) 2), // 签到
 	TaskQuery((byte) 3), // 接收任务
 	UploadFile((byte) 4), // 上传文件
-	UserTaskStatusChange((byte) 5);// 用户任务的状态改变
+	UserTaskStatusChange((byte) 5), // 用户任务的状态改变
+	TaskQryUserNewTaskCount((byte) 6), // 查询用户新的任务的数量
+	TaskQryUserNewTaskList((byte) 7), // 查询用户新的任务的列表
+	TaskQryByID((byte) 8);// 根据用户Id查询任务列表信息
 
 	private byte value;
 
@@ -30,6 +33,12 @@ public enum OperateType {
 			return UploadFile;
 		case 5:
 			return UserTaskStatusChange;
+		case 6:
+			return TaskQryUserNewTaskCount;
+		case 7:
+			return TaskQryUserNewTaskList;
+		case 8:
+			return TaskQryByID;
 		default:
 			return Error;
 		}

@@ -39,4 +39,10 @@
     <string name="net_work_unavailable">无网络连接</string>
     <string name="refresh">刷新</string>
     <string name="start_task">开始处理</string>
+    <string name="app_login_title">外访任务管理助手</string>
+    <string name="connection_out_of_time">连接超时，请稍后再试</string>
+    <string name="identity_card">证件号：</string>
+    <string name="bankCard">银行卡号：</string>
+    <string name="case_amount">委案金额：</string>
+    <string name="has_payed">已还款：</string>
 </resources>

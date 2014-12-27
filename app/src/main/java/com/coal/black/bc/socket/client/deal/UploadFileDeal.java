@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.List;
+
 import com.coal.black.bc.socket.IDtoBase;
 import com.coal.black.bc.socket.client.handlers.UploadFileHandler;
 import com.coal.black.bc.socket.client.returndto.UploadFileResult;
@@ -16,6 +17,7 @@ import com.coal.black.bc.socket.dto.UploadFileDto;
 import com.coal.black.bc.socket.dto.ServerReturnFlagDto;
 import com.coal.black.bc.socket.exception.ExceptionBase;
 import com.coal.black.bc.socket.utils.DataUtil;
+import com.coal.black.bc.socket.utils.InputStreamUtils;
 
 public class UploadFileDeal {
 	public UploadFileResult deal(ClientInfoDto clientDto, List<IDtoBase> dtoList, InputStream in, OutputStream out, UploadFileHandler uploadHandler)
@@ -64,7 +66,6 @@ public class UploadFileDeal {
 			byte[] fileDataLengthBytes = DataUtil.int2Bytes(fileDto.getFileLength() - existLength);
 
 			out.write(fileDataLengthBytes);// 写一下总共还需要上传的文件大小
-
 			randomAccessFile.skipBytes(existLength);// 跳过前面的existLength
 			byte[] bytes = new byte[20480];
 			int length = 0;
@@ -114,10 +115,7 @@ public class UploadFileDeal {
 	 * @throws java.io.IOException
 	 */
 	public static int getHasReceviedBytesLength(InputStream in) throws IOException {
-		byte[] lengthBytes = new byte[4];
-		if (in.read(lengthBytes, 0, 4) != 4) {
-			return -1;
-		}
+		byte[] lengthBytes = InputStreamUtils.readFixedLengthData(4, in);
 		int existLength = DataUtil.bytes2Int(lengthBytes);
 		return existLength;
 	}
@@ -156,10 +154,7 @@ public class UploadFileDeal {
 	 * 获取服务器端的返回结果
 	 */
 	private static ServerReturnFlagDto readSrf(InputStream in) throws IOException {
-		byte[] serverFlageBytes = new byte[ServerReturnFlagDto.bytesLength];
-		if (in.read(serverFlageBytes, 0, ServerReturnFlagDto.bytesLength) != ServerReturnFlagDto.bytesLength) {// 首先读取的长度不对直接跑出一个UploadFileResult错误的结果
-			return null;
-		}
+		byte[] serverFlageBytes = InputStreamUtils.readFixedLengthData(ServerReturnFlagDto.bytesLength, in);
 		ServerReturnFlagDto srf = ServerReturnFlagCoder.fromWire(serverFlageBytes);// 否则转换为ServerReturnFlagDto
 		return srf;
 	}

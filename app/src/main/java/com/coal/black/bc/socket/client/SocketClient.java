@@ -10,6 +10,9 @@ import com.coal.black.bc.socket.Constants;
 import com.coal.black.bc.socket.IDtoBase;
 import com.coal.black.bc.socket.client.deal.LoginDeal;
 import com.coal.black.bc.socket.client.deal.SignInDeal;
+import com.coal.black.bc.socket.client.deal.TaskQryUserNewTaskCountDeal;
+import com.coal.black.bc.socket.client.deal.TaskQryUserNewTaskListDeal;
+import com.coal.black.bc.socket.client.deal.TaskQueryByTaskIDDeal;
 import com.coal.black.bc.socket.client.deal.TaskQueryDeal;
 import com.coal.black.bc.socket.client.deal.UploadFileDeal;
 import com.coal.black.bc.socket.client.deal.UserTaskStatusChangeDeal;
@@ -41,7 +44,11 @@ public class SocketClient {
 		ClientInfoDto clientDto = new ClientInfoDto();
 		clientDto.setBeginFlag(Constants.SERVER_BEGIN_FLAG);
 		clientDto.setMac(ClientGlobal.macBytes);
-		clientDto.setUserId(userId);
+		if (userId <= 0) {
+			clientDto.setUserId(ClientGlobal.userId);
+		} else {
+			clientDto.setUserId(userId);
+		}
 
 		Socket socket = null;
 		OutputStream out = null;
@@ -68,11 +75,19 @@ public class SocketClient {
 			case TaskQuery:
 				clientDto.setOperateType(OperateType.TaskQuery);
 				TaskQueryResult result = new TaskQueryDeal().deal(clientDto, objDtoList, in, out);
-				out.write(new byte[] { 1 });
 				return result;
 			case UserTaskStatusChange:
 				clientDto.setOperateType(OperateType.UserTaskStatusChange);
 				return new UserTaskStatusChangeDeal().deal(clientDto, objDtoList, in, out);
+			case TaskQryUserNewTaskCount:
+				clientDto.setOperateType(OperateType.TaskQryUserNewTaskCount);// 查询用户新任务数目
+				return new TaskQryUserNewTaskCountDeal().deal(clientDto, objDtoList, in, out);
+			case TaskQryUserNewTaskList:
+				clientDto.setOperateType(OperateType.TaskQryUserNewTaskList);// 查询用户新任务列表
+				return new TaskQryUserNewTaskListDeal().deal(clientDto, objDtoList, in, out);
+			case TaskQryByID:
+				clientDto.setOperateType(OperateType.TaskQryByID);
+				return new TaskQueryByTaskIDDeal().deal(clientDto, objDtoList, in, out);
 			default:
 				break;
 			}

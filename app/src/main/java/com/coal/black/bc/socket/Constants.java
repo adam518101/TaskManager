@@ -32,4 +32,10 @@ public class Constants {
 
 	public static String USER_TASK_STATUS_CHANGE_CODER_TO_WIRE_ERROR = "User.Task.Status.Change.Coder.To.Wire.Exception";
 	public static String USER_TASK_STATUS_CHANGE_CODER_FORM_WIRE_ERROR = "User.Task.Status.Change.Coder.from.Wire.Exception";
+
+	public static String TASK_QUERY_USER_NEW_TASK_CODER_TO_WIRE_ERROR = "Task.Query.User.New.Task.Coder.To.Wire.Exception";
+	public static String TASK_QUERY_USER_NEW_TASK_CODER_FORM_WIRE_ERROR = "Task.Query.User.New.Task.Coder.from.Wire.Exception";
+
+	public static String TASK_QUERY_BY_TASK_ID_CODER_TO_WIRE_ERROR = "Task.Query.By.Task.ID.Coder.To.Wire.Exception";
+	public static String TASK_QUERY_BY_TASK_ID_CODER_FORM_WIRE_ERROR = "Task.Query.By.Task.ID.Coder.from.Wire.Exception";
 }
