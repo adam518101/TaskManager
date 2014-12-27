@@ -40,12 +40,12 @@ public class SingleTaskActivity extends Activity {
             Utils.dissmissProgressDialog(mProgressDialog);
             if (msg.obj instanceof UserTaskStatusChangeResult) {
                 UserTaskStatusChangeResult result = (UserTaskStatusChangeResult) msg.obj;
-                //TODO : Whether success or not, reload task from server(but consider a min time for reload task).
+                //TODO : Whether success or not, reload the task from server(but consider a min time for reload task).
                 if (result.isSuccess()) {
                     mTask.setTaskStatus(msg.arg1);
-                    Utils.showToast(mToast, "Task status changed.", getApplicationContext());
+                    Utils.showToast(mToast, getString(R.string.task_status_change_success), getApplicationContext());
                 } else {
-                    Utils.showToast(mToast, "Change task status failed.", getApplicationContext());
+                    Utils.showToast(mToast, getString(R.string.change_task_status_fail), getApplicationContext());
                 }
             }
         }

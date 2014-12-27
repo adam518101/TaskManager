@@ -20,8 +20,8 @@
             android:id="@+id/listview_tasks"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:divider="@android:color/transparent"
-            android:dividerHeight="10.0sp"/>
+            android:divider="@android:drawable/divider_horizontal_textfield"
+            android:dividerHeight="1sp"/>
 
         <TextView
             android:id="@+id/txt_empty"

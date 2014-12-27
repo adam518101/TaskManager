@@ -45,4 +45,6 @@
     <string name="bankCard">银行卡号：</string>
     <string name="case_amount">委案金额：</string>
     <string name="has_payed">已还款：</string>
+    <string name="change_task_status_fail">变更任务状态失败，请稍后重试</string>
+    <string name="task_status_change_success">状态切换成功！</string>
 </resources>

@@ -48,5 +48,7 @@
     <string name="bankCard">Bank Card:</string>
     <string name="case_amount">Case Amount:</string>
     <string name="has_payed">Has Paid:</string>
+    <string name="change_task_status_fail">Change task status failed.</string>
+    <string name="task_status_change_success">Task status changed.</string>
 
 </resources>
