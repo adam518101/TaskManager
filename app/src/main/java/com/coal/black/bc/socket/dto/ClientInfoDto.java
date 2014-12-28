@@ -55,6 +55,10 @@ public class ClientInfoDto extends IDtoBase {
 		this.beginFlag = beginFlag;
 	}
 
+	public String getMacAddress() {
+		return CommonUtils.bytes2MacString(mac);
+	}
+
 	public String toString() {
 		return "ClientInfoDto [beginFlag=" + String.valueOf(beginFlag) + ", mac=" + CommonUtils.bytes2MacString(mac) + ", userId=" + userId + ", operateType="
 				+ operateType + ", dataLength=" + dataLength + "]";

@@ -50,5 +50,12 @@
     <string name="has_payed">Has Paid:</string>
     <string name="change_task_status_fail">Change task status failed.</string>
     <string name="task_status_change_success">Task status changed.</string>
+    <string name="task_accept_success">Task is successfully accepted.</string>
+    <string name="task_status_default">Task Status</string>
+    <string name="un_read">UnRead</string>
+    <string name="has_been_read">Read</string>
+    <string name="task_processing">Processing</string>
+    <string name="task_status_not_valid">Task status not valid, may be accepted by others.</string>
+    <string name="task_total_count">Task Total Count</string>
 
 </resources>

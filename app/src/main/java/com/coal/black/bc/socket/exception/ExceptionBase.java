@@ -10,4 +10,5 @@ public class ExceptionBase {
 	public static byte USER_TASK_TO_HAS_READED_NOT_FROM_NOT_READED = 6;// 变成已读的时候的状态不是从未读取过来的
 	public static byte USER_TASK_TO_IN_DEALING_NOT_FROM_HAS_READED = 7;// 变成正在处理的时候不是从已经读取状态过来的
 	public static byte USER_TASK_TO_HAS_COMMIT_NOT_FROM_IN_DEALING = 8;// 变成正提交完成的时候不是从正在处理中过来的
+	public static byte COMMUNICATION_VALID_FAIL = 9;// 通信之前的验证失败（表示不能通信，失败的原因一般是mac地址和用户id不匹配）
 }

@@ -73,6 +73,7 @@ public class TaskListActivity extends Activity {
     private LocationUI mLocationUI;
     private SharedPreferences mPrefs;
     private NetworkState mNetWorkState;
+    private View mListHeader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,12 +113,14 @@ public class TaskListActivity extends Activity {
         mProgressLayout = (ProgressLayout) findViewById(R.id.progress_layout);
         mTaskListAdapter = new TaskListAdapter(this.getApplicationContext(),
                 android.R.layout.simple_list_item_1, new ArrayList<TaskDto>());
+        mListHeader = getLayoutInflater().inflate(R.layout.list_header, null);
+        mTaskListView.addHeaderView(mListHeader);
         mTaskListView.setAdapter(mTaskListAdapter);
-        mTaskLoaderCallback = new TaskLoaderCallback(this, mTaskListView, mTaskListAdapter);
+        mTaskLoaderCallback = new TaskLoaderCallback(this, mTaskListView, mTaskListAdapter, mListHeader);
         mTaskListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                TaskDto task = mTaskListAdapter.getItem(i);
+                TaskDto task = (TaskDto) adapterView.getAdapter().getItem(i);
                 mEventBus.postSticky(task);
                 Intent intent = new Intent(TaskListActivity.this,
                         SingleTaskActivity.class);

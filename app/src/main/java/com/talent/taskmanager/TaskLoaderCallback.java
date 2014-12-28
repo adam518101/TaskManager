@@ -6,14 +6,20 @@ import android.content.Context;
 import android.content.Loader;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.talent.taskmanager.task.TaskLoader;
 import com.coal.black.bc.socket.dto.TaskDto;
 import com.github.androidprogresslayout.ProgressLayout;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -28,8 +34,26 @@ public class TaskLoaderCallback implements LoaderManager.LoaderCallbacks<ArrayLi
     private ArrayAdapter mAdapter;
     private ProgressLayout mProgressLayout;
     private SharedPreferences mPrefs;
+    private View mListHeader;
+    private Handler mHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            Log.d("acmllaugh1", "set task count to screen.");
+            int totalCount = (Integer)msg.obj;
+            int unreadCount = msg.arg1;
+            int readCount = msg.arg2;
+            int processingCount = totalCount - unreadCount - readCount;
+            if (mListHeader != null) {
+                ((TextView) (mListHeader.findViewById(R.id.header_count_num))).setText(Integer.toString(totalCount));
+                ((TextView) mListHeader.findViewById(R.id.list_header_unread_count)).setText(Integer.toString(unreadCount));
+                ((TextView) mListHeader.findViewById(R.id.list_header_read_count)).setText(Integer.toString(readCount));
+                ((TextView) mListHeader.findViewById(R.id.list_header_processing_count)).setText(Integer.toString(processingCount));
+            }
+        }
+    };
 
-    public TaskLoaderCallback(Activity activity, ListView taskListView, ArrayAdapter adapter) {
+    public TaskLoaderCallback(Activity activity, ListView taskListView,
+                              ArrayAdapter adapter, View headerView) {
         mActivity = activity;
         mTaskList = taskListView;
         mAdapter = adapter;
@@ -37,6 +61,7 @@ public class TaskLoaderCallback implements LoaderManager.LoaderCallbacks<ArrayLi
             mProgressLayout = ((TaskListActivity) mActivity).getProgressLayout();
             mEmptyView = (TextView) mActivity.findViewById(R.id.txt_empty);
         }
+        mListHeader = headerView;
     }
 
     @Override
@@ -53,9 +78,39 @@ public class TaskLoaderCallback implements LoaderManager.LoaderCallbacks<ArrayLi
             mAdapter.addAll(tasks);
             mAdapter.notifyDataSetChanged();
             showEmptyView(tasks.size() < 1);
+            showListHeader(tasks);
             saveLoadTime();
         }
         displayProgress(false);
+    }
+
+    private void showListHeader(final ArrayList<TaskDto> tasks) {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int unreadCount = 0;
+                int readCount = 0;
+                for (TaskDto task : tasks) {
+                    if (mActivity == null || mActivity.isFinishing()) {
+                        return;
+                    }
+                    switch (task.getUserTaskStatus()) {
+                        case 1:
+                            unreadCount++;
+                            break;
+                        case 2:
+                            readCount++;
+                            break;
+                    }
+                }
+                Message msg = new Message();
+                msg.obj = tasks.size();
+                msg.arg1 = unreadCount;
+                msg.arg2 = readCount;
+                mHandler.sendMessage(msg);
+            }
+        });
+        thread.start();
     }
 
     private void saveLoadTime() {

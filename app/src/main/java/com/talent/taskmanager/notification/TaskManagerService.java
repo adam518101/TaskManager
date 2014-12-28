@@ -97,18 +97,6 @@ public class TaskManagerService extends Service {
         @Override
         protected Void doInBackground(Void... voids) {
             // In background, we update new positions and see if there is new task arriving.
-//            try {
-//                Random random = new Random();
-//                int i = 0;
-//                while (true) {
-//                    if (!isTaskListInFront()) {
-//                        Thread.sleep(5000);
-//                        showNotification(++i);
-//                    }
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
             try {
                 while (true) {
                     Thread.sleep(60000);
@@ -131,11 +119,12 @@ public class TaskManagerService extends Service {
     }
 
     private void getNewTasks() {
-        // We check if there is a new task.
+        // Check if there is a new task.
         long lashRefreshTime = getLastRefreshTime();
         TaskQryUserNewTaskHandler handler = new TaskQryUserNewTaskHandler();
         TaskQryUserNewTaskCountResult countResult = handler.qryNewTaskCount(lashRefreshTime);
         if (countResult.isSuccess() && countResult.getCount() > 0) {
+            Log.d("acmllaugh1", "we get a new task.");
             showNotification(countResult.getCount());
         } else {
             Log.d("acmllaugh1", "refresh task failed." +countResult.getThrowable().getMessage());

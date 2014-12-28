@@ -47,4 +47,11 @@
     <string name="has_payed">已还款：</string>
     <string name="change_task_status_fail">变更任务状态失败，请稍后重试</string>
     <string name="task_status_change_success">状态切换成功！</string>
+    <string name="task_accept_success">接受任务成功</string>
+    <string name="task_status_default">任务状态</string>
+    <string name="un_read">未读</string>
+    <string name="has_been_read">已读</string>
+    <string name="task_processing">处理中</string>
+    <string name="task_status_not_valid">任务状态不正确，可能该任务已被他人领取</string>
+    <string name="task_total_count">当前任务总数</string>
 </resources>

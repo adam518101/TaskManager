@@ -18,6 +18,7 @@ import com.coal.black.bc.socket.client.handlers.UserTaskStatusChangeHandler;
 import com.coal.black.bc.socket.client.returndto.UserTaskStatusChangeResult;
 import com.coal.black.bc.socket.common.UserTaskStatusCommon;
 import com.coal.black.bc.socket.dto.TaskDto;
+import com.coal.black.bc.socket.exception.ExceptionBase;
 import com.talent.taskmanager.network.NetworkState;
 import com.talent.taskmanager.task.TaskDetailDialog;
 
@@ -42,14 +43,26 @@ public class SingleTaskActivity extends Activity {
                 UserTaskStatusChangeResult result = (UserTaskStatusChangeResult) msg.obj;
                 //TODO : Whether success or not, reload the task from server(but consider a min time for reload task).
                 if (result.isSuccess()) {
+                    if (msg.arg1 == UserTaskStatusCommon.HAS_READED) {
+                        //We changed a task from unread to readed.
+                    }
+                    if (msg.arg1 == UserTaskStatusCommon.IN_DEALING) {
+                        Utils.showToast(mToast,getString(R.string.task_accept_success), getApplicationContext());
+                    }
                     mTask.setTaskStatus(msg.arg1);
-                    Utils.showToast(mToast, getString(R.string.task_status_change_success), getApplicationContext());
+
                 } else {
-                    Utils.showToast(mToast, getString(R.string.change_task_status_fail), getApplicationContext());
+                    Log.d("acmllaugh1", "handleMessage (line 38): result error code : " + result.getBusinessErrorCode());
+                    if (result.isBusException() && result.getBusinessErrorCode() == ExceptionBase.USER_TASK_NOT_VALID) {
+                        Utils.showToast(mToast, getString(R.string.task_status_not_valid), getApplicationContext());
+                        SingleTaskActivity.this.finish();
+                    }
+                   // Utils.showToast(mToast, getString(R.string.change_task_status_fail), getApplicationContext());
                 }
             }
         }
     };
+    private Menu mMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +103,9 @@ public class SingleTaskActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        mMenu = menu;
         getMenuInflater().inflate(R.menu.single_task, menu);
+        checkTaskStatus();
         return true;
     }
 
@@ -155,7 +170,26 @@ public class SingleTaskActivity extends Activity {
         }
         mTaskTitleView.setText(task.getVisitReason());
         mTask = task;
-        Log.d("acmllaugh1", "onEvent (line 93): task status : " + task.getTaskStatus());
+    }
+
+    private void checkTaskStatus() {
+        if (mTask == null) {
+            return;
+        }
+        switch (mTask.getUserTaskStatus()) {
+            case UserTaskStatusCommon.NOT_READ:
+                changeTaskStatus(UserTaskStatusCommon.HAS_READED);
+                break;
+            case UserTaskStatusCommon.IN_DEALING:
+                int count = mMenu.size();
+                for (int i = 0; i < count; i++) {
+                    MenuItem item = mMenu.getItem(i);
+                    if (item.getItemId() == R.id.action_start_task) {
+                        item.setVisible(false);
+                    }
+                }
+                break;
+        }
     }
 
 
