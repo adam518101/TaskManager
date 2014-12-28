@@ -27,29 +27,10 @@
         />
 
     <TextView
-        android:id="@+id/txt_input_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/txt_single_task_title"
-        android:layout_marginTop="10dp"
-        android:text="@string/text_input_title"
-        android:textSize="20sp"/>
-
-    <EditText
-        android:id="@+id/edit_txt_input"
-        android:layout_width="match_parent"
-        android:layout_height="150dp"
-        android:background="@drawable/textline"
-        android:layout_marginTop="10dp"
-        android:layout_below="@id/txt_input_title"
-        android:paddingTop="5dp"
-        android:gravity="top|left"/>
-
-    <TextView
         android:id="@+id/txt_pic_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/edit_txt_input"
+        android:layout_below="@id/txt_single_task_title"
         android:layout_marginTop="10dp"
         android:text="@string/pic_title"
         android:textSize="20sp"/>

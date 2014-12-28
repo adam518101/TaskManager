@@ -73,9 +73,6 @@ public class TaskItemView extends RelativeLayout {
         for (int i = getChildCount()-1; i >= 0; i--) {
             View view = getChildAt(i);
             if (view instanceof TextView) {
-                if (view.getId() == R.id.txt_task_title) {
-                    Log.d("acmllaugh1", "task title is processed.");
-                }
                 TextView textView = (TextView) view;
                 TextPaint tp = textView.getPaint();
                 tp.setFakeBoldText(needBold);

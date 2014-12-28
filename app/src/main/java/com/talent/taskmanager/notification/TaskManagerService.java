@@ -17,11 +17,12 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.coal.black.bc.socket.client.ClientGlobal;
 import com.coal.black.bc.socket.client.handlers.TaskQryUserNewTaskHandler;
 import com.coal.black.bc.socket.client.returndto.TaskQryUserNewTaskCountResult;
-import com.coal.black.bc.socket.client.returndto.TaskQryUserNewTaskListResult;
 import com.talent.taskmanager.Constants;
 import com.talent.taskmanager.R;
+import com.talent.taskmanager.Utils;
 import com.talent.taskmanager.location.LocationManager;
 import com.coal.black.bc.socket.client.handlers.UserSignHandler;
 import com.coal.black.bc.socket.client.returndto.SignInResult;
@@ -46,17 +47,27 @@ public class TaskManagerService extends Service {
     private int mUpdateCountDown;
     private boolean mLastUpdateSuccess;
     private SharedPreferences mPrefs;
+    private int mUserID;
+    private boolean mServiceIsRunning;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         initVars();
         registerToTimeCount();
-//        PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
-//        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WAKE_LOCK");
-//        mWakeLock.acquire();
+        acquireWakeLock();
         startRecordLocation();
-        new MyTask().execute();
+        getSavedUserID();
+        mServiceIsRunning = true;
+        new ServiceTask().execute();
         return START_STICKY; // Make sure our service will start when it is closed by system due to low memory.
+    }
+
+    private void acquireWakeLock() {
+        PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+        mWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WAKE_LOCK");
+        if(!mWakeLock.isHeld()) {
+            mWakeLock.acquire();
+        }
     }
 
     private void initVars() {
@@ -74,8 +85,12 @@ public class TaskManagerService extends Service {
 
     @Override
     public void onDestroy() {
+        mServiceIsRunning = false;
         unregisterReceiver(mReceiver);
         stopRecordLocation();
+        if (mWakeLock.isHeld()) {
+            mWakeLock.release();
+        }
         super.onDestroy();
     }
 
@@ -84,6 +99,9 @@ public class TaskManagerService extends Service {
     }
 
     private void stopRecordLocation() {
+        if (mLocationManager == null) {
+            return;
+        }
         mLocationManager.recordLocation(false);
     }
 
@@ -92,14 +110,17 @@ public class TaskManagerService extends Service {
         return null;
     }
 
-    private class MyTask extends AsyncTask<Void, Void, Void> {
+    private class ServiceTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
             // In background, we update new positions and see if there is new task arriving.
             try {
                 while (true) {
-                    Thread.sleep(60000);
+                    if (!mServiceIsRunning) {
+                        break;
+                    }
+                    Thread.sleep(10000);
                     updateLocationInformation();
 //                    if (!isTaskListInFront()) {
                     getNewTasks();
@@ -120,15 +141,15 @@ public class TaskManagerService extends Service {
 
     private void getNewTasks() {
         // Check if there is a new task.
-        long lashRefreshTime = getLastRefreshTime();
-        TaskQryUserNewTaskHandler handler = new TaskQryUserNewTaskHandler();
-        TaskQryUserNewTaskCountResult countResult = handler.qryNewTaskCount(lashRefreshTime);
-        if (countResult.isSuccess() && countResult.getCount() > 0) {
-            Log.d("acmllaugh1", "we get a new task.");
-            showNotification(countResult.getCount());
-        } else {
-            Log.d("acmllaugh1", "refresh task failed." +countResult.getThrowable().getMessage());
-        }
+//        long lashRefreshTime = getLastRefreshTime();
+//        TaskQryUserNewTaskHandler handler = new TaskQryUserNewTaskHandler();
+//        TaskQryUserNewTaskCountResult countResult = handler.qryNewTaskCount(lashRefreshTime);
+//        if (countResult.isSuccess() && countResult.getCount() > 0) {
+//            Log.d("acmllaugh1", "we get a new task.");
+//            showNotification(countResult.getCount());
+//        } else {
+//            Log.d("acmllaugh1", "refresh task failed." +countResult.getThrowable().getMessage());
+//        }
     }
 
     private long getLastRefreshTime() {
@@ -140,7 +161,7 @@ public class TaskManagerService extends Service {
         SignInDto dto = new SignInDto();
         Location location = mLocationManager.getCurrentLocation();
         if (location == null) {
-            Log.d("acmllaugh1", "updateLocationInformation (line 120): location is null.");
+            Log.d("acmllaugh1", "updateLocationInformation (line 120): location is null. user id is : " + ClientGlobal.userId);
             return;
         }
         dto.setLatitude(location.getLatitude());
@@ -152,7 +173,7 @@ public class TaskManagerService extends Service {
             mUpdateCountDown--;
         }
         if (mUpdateCountDown <= 0 || !mLastUpdateSuccess) {
-            Log.d("acmllaugh1", "updateLocationInformation (line 147): it time to upload location information");
+            Log.d("acmllaugh1", "update location. Current userid ; " + ClientGlobal.userId);
             SignInResult result = mLocationHandler.signIn(mRecordedLocations);
             if (result.isSuccess()) {
                 mRecordedLocations.clear();
@@ -163,6 +184,16 @@ public class TaskManagerService extends Service {
             }
             mLastUpdateSuccess = false;
             Log.d("acmllaugh1", "updateLocationInformation (line 155): upload location failed.");
+        }
+    }
+
+    private void getSavedUserID() {
+        mPrefs = getSharedPreferences(Constants.TASK_MANAGER, MODE_PRIVATE);
+        mUserID = mPrefs.getInt(Constants.SAVED_USER_ID, -1);
+        if (mUserID != -1 && mUserID != 0) {
+            ClientGlobal.userId = mUserID;
+        }else{
+            this.stopSelf();
         }
     }
 

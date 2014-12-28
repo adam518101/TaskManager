@@ -5,7 +5,7 @@ android {
     buildToolsVersion "19.1.0"
 
     defaultConfig {
-        applicationId "com.acmllaugh.taskmanager"
+        applicationId "com.talent.taskmanager"
         minSdkVersion 15
         targetSdkVersion 20
         versionCode 1
