@@ -57,5 +57,13 @@
     <string name="task_processing">Processing</string>
     <string name="task_status_not_valid">Task status not valid, may be accepted by others.</string>
     <string name="task_total_count">Task Total Count</string>
+    <string name="capture_image">Capture to upload</string>
+    <string name="select_image">Select picture to upload</string>
+    <string name="record_audio">Record audio to upload</string>
+    <string name="select_audio">Select audio to upload</string>
+    <string name="invalid_image">Invalid image file!</string>
+    <string name="invalid_audio">Invalid audio file!</string>
+    <string name="file_not_exist">File is not exist.</string>
+    <string name="sd_card_not_available">SD card is not available, images and audios can not display.</string>
 
 </resources>

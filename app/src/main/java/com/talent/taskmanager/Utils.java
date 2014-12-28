@@ -6,11 +6,14 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.talent.taskmanager.network.NetworkState;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -112,5 +115,29 @@ public class Utils {
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }
+    }
+
+    /**
+     * Check if sd card is available
+     * @return
+     */
+    public static boolean isSDCardAvailable() {
+        String sdStatus = Environment.getExternalStorageState();
+        if (!sdStatus.equals(Environment.MEDIA_MOUNTED)) {
+            return false;
+        }
+        return true;
+    }
+
+    public static String getImageName(long time) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String currentTime = format.format(new Date(time));
+        return "IMG_" + currentTime + ".jpg";
+    }
+
+    public static String getAudioName(long time) {
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd_HHmmss");
+        String currentTime = format.format(new Date(time));
+        return "Audio_" + currentTime + ".amr";
     }
 }

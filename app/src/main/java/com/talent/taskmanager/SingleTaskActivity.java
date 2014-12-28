@@ -3,13 +3,23 @@ package com.talent.taskmanager;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,13 +29,40 @@ import com.coal.black.bc.socket.client.returndto.UserTaskStatusChangeResult;
 import com.coal.black.bc.socket.common.UserTaskStatusCommon;
 import com.coal.black.bc.socket.dto.TaskDto;
 import com.coal.black.bc.socket.exception.ExceptionBase;
+import com.talent.taskmanager.file.FileOperationUtils;
 import com.talent.taskmanager.network.NetworkState;
 import com.talent.taskmanager.task.TaskDetailDialog;
+
+import java.io.File;
+import java.io.IOException;
 
 import de.greenrobot.event.EventBus;
 
 
 public class SingleTaskActivity extends Activity {
+
+    private static final int REQ_CODE_CAPTURE_PICTURE = 101;
+    private static final int REQ_CODE_SELECT_PICTURE = 102;
+    private static final int REQ_CODE_RECORD_AUDIO = 103;
+    private static final int REQ_CODE_SELECT_AUDIO = 104;
+
+    private static final int BUTTON_CAPTURE_IMAGE = R.id.btn_capture_image;
+    private static final int BUTTON_SELECT_IMAGE = R.id.btn_select_image;
+    private static final int BUTTON_RECORD_AUDIO = R.id.btn_record_audio;
+    private static final int BUTTON_SELECT_AUDIO = R.id.btn_select_audio;
+
+    private static final String FILE_TYPE_IMAGE = "image/*";
+    private static final String FILE_TYPE_AUDIO = "audio/*";
+    private static final String TEMP_FILE_NAME = "image.jpeg";
+
+    private Button mBtnCapture = null;
+    private Button mBtnSelectImage = null;
+    private Button mBtnSoundRecord = null;
+    private Button mBtnSelectAudio = null;
+    private LinearLayout mGridImages = null;
+    private LinearLayout mGridAudios = null;
+    private String mTaskFilePath = null;
+    public static final String DIRECTORY = Environment.getExternalStorageDirectory() + "/TaskFiles";
 
     private EventBus mEventBus = EventBus.getDefault();
     private TaskDto mTask;
@@ -70,6 +107,8 @@ public class SingleTaskActivity extends Activity {
         setContentView(R.layout.activity_single_task);
         initVariables();
         registerToEventBus();
+
+        initFiles();
     }
 
     private void initVariables() {
@@ -192,5 +231,236 @@ public class SingleTaskActivity extends Activity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_OK) {
+            switch (requestCode) {
+                case REQ_CODE_CAPTURE_PICTURE:
+                    captureImageResult(data);
+                    break;
+                case REQ_CODE_SELECT_PICTURE:
+                    selectImageResult(data);
+                    break;
+                case REQ_CODE_RECORD_AUDIO:
+                    recordAudioResult(data);
+                    break;
+                case REQ_CODE_SELECT_AUDIO:
+                    selectAudioResult(data);
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
 
+    private void initFiles() {
+        if (mTask == null)
+            return;
+
+        mTaskFilePath = DIRECTORY + "/" + mTask.getId();
+        if (!Utils.isSDCardAvailable()) {
+            //TODO:
+            return;
+        }
+        File dir = new File(DIRECTORY);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        // Create folder if it is not exist.
+        dir = new File(mTaskFilePath);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        // Add .nomedia file that will not be scanned
+        File noMediaFile = new File(mTaskFilePath + "/" + ".nomedia");
+        if (!noMediaFile.exists()) {
+            try {
+                noMediaFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        ButtonOnclickListener buttonOnclickListener = new ButtonOnclickListener();
+        // Capture a image
+        mBtnCapture = (Button) this.findViewById(BUTTON_CAPTURE_IMAGE);
+        mBtnCapture.setOnClickListener(buttonOnclickListener);
+        // Select a image
+        mBtnSelectImage = (Button) findViewById(BUTTON_SELECT_IMAGE);
+        mBtnSelectImage.setOnClickListener(buttonOnclickListener);
+        mGridImages = (LinearLayout) findViewById(R.id.grid_images);
+        // Record an audio
+        mBtnSoundRecord = (Button) this.findViewById(BUTTON_RECORD_AUDIO);
+        mBtnSoundRecord.setOnClickListener(buttonOnclickListener);
+        // Select an audio
+        mBtnSelectAudio = (Button) findViewById(BUTTON_SELECT_AUDIO);
+        mBtnSelectAudio.setOnClickListener(buttonOnclickListener);
+        mGridAudios = (LinearLayout) findViewById(R.id.grid_audios);
+        File[] files = new File(mTaskFilePath).listFiles();
+        for (int i = 0; i < files.length; i++) {
+            if (FILE_TYPE_IMAGE.equals(FileOperationUtils.getMIMEType(files[i]))) {
+                mGridImages.addView(createImageView(files[i].getPath()), mGridImages.getChildCount());
+            } else if (FILE_TYPE_AUDIO.equals(FileOperationUtils.getMIMEType(files[i]))) {
+                mGridAudios.addView(createAudioView(files[i].getPath()), mGridAudios.getChildCount());
+            }
+        }
+    }
+
+
+    /* Four actions: capture image, select image, record audio, and select audio */
+    private void captureImage() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        Uri imageUri = Uri.fromFile(new File(mTaskFilePath, TEMP_FILE_NAME));
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+        startActivityForResult(intent, REQ_CODE_CAPTURE_PICTURE);
+    }
+
+    private void selectImage() {
+        Intent intent = new Intent();
+        intent.setType(FILE_TYPE_IMAGE);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, REQ_CODE_SELECT_PICTURE);
+    }
+
+    private void recordAudio() {
+        Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+        startActivityForResult(intent, REQ_CODE_RECORD_AUDIO);
+    }
+
+    private void selectAudio() {
+        Intent intent = new Intent();
+        intent.setType(FILE_TYPE_AUDIO);
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(intent, REQ_CODE_SELECT_AUDIO);
+    }
+
+    /* Four corresponding results of actions above */
+    private void captureImageResult(Intent data) {
+        String name = Utils.getImageName(System.currentTimeMillis());
+        File oldFile = new File(mTaskFilePath, TEMP_FILE_NAME);
+        File newFile = new File(mTaskFilePath, name);
+        oldFile.renameTo(newFile);
+        MediaScannerConnection.scanFile(getApplication(), new String[]{
+                mTaskFilePath, name}, null, null);
+        String path = mTaskFilePath + "/" + name;
+        Bitmap bitmap = FileOperationUtils.compressImageBySrc(path);
+        if (bitmap != null) {
+            // Delete original image, and save compressed image.
+            newFile.delete();
+            FileOperationUtils.saveBitmapToFile(bitmap, path);
+        }
+        Log.d("Chris", "captureImageResult, path = " + path);
+        mGridImages.addView(createImageView(path), mGridImages.getChildCount());
+    }
+
+    private void selectImageResult(Intent data) {
+        Uri uri = data.getData();
+        String oldPath = FileOperationUtils.getFilePathByUri(uri, this);
+        if (FILE_TYPE_IMAGE.equals(FileOperationUtils.getMIMEType(new File(oldPath)))) {
+            Bitmap bitmap = FileOperationUtils.compressImageBySrc(oldPath);
+            String name = Utils.getImageName(System.currentTimeMillis());
+            String newPath = mTaskFilePath + "/" + name;
+            FileOperationUtils.saveBitmapToFile(bitmap, newPath);
+            MediaScannerConnection.scanFile(getApplication(),
+                    new String[] { mTaskFilePath }, null, null);
+            Log.d("Chris", "selectImageResult, path = " + newPath);
+            mGridImages.addView(createImageView(newPath), mGridImages.getChildCount());
+        } else {
+            Utils.showToast(mToast,getString(R.string.invalid_image), getApplicationContext());
+        }
+    }
+
+    private void recordAudioResult(Intent data) {
+        Uri uri = data.getData();
+        String oldPath = FileOperationUtils.getFilePathByUri(uri, this);
+        String newPath = mTaskFilePath + "/"
+                + Utils.getAudioName(System.currentTimeMillis());
+        File oldFile = new File(oldPath);
+        File newFile = new File(newPath);
+        oldFile.renameTo(newFile);
+        MediaScannerConnection.scanFile(getApplication(),
+                new String[] { mTaskFilePath }, null, null);
+        mGridAudios.addView(createAudioView(newPath), mGridAudios.getChildCount());
+        Log.d("Chris", "recordAudioResult, path = " + newPath);
+    }
+
+    private void selectAudioResult(Intent data) {
+        Uri uri = data.getData();
+        String oldPath = FileOperationUtils.getFilePathByUri(uri, this);
+        if (FILE_TYPE_AUDIO.equals(FileOperationUtils.getMIMEType(new File(oldPath)))) {
+            String newPath = mTaskFilePath + "/"
+                    + Utils.getAudioName(System.currentTimeMillis());
+            FileOperationUtils.copyFile(oldPath, newPath);
+            MediaScannerConnection.scanFile(getApplication(),
+                    new String[] { mTaskFilePath }, null, null);
+
+            mGridAudios.addView(createAudioView(newPath), mGridAudios.getChildCount());
+            Log.d("Chris", "selectAudioResult, path = " + newPath);
+        } else {
+            Utils.showToast(mToast,getString(R.string.invalid_audio), getApplicationContext());
+        }
+    }
+
+    private ImageView createImageView(String path) {
+        final ImageView image = new ImageView(this);
+        image.setImageURI(Uri.parse(path));
+        image.setPadding(5, 0, 5, 0);
+        image.setTag(path);
+        image.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(
+                        Uri.fromFile(new File(image.getTag().toString())),
+                        FILE_TYPE_IMAGE);
+                startActivity(intent);
+            }
+        });
+        return image;
+    }
+
+    private ImageView createAudioView(String path) {
+        final ImageView audio = new ImageView(this);
+        //audio.setImageResource(R.drawable.ic_launcher_record_audio);
+        //audio.setBackground(getResources().getDrawable(R.drawable.ic_launcher_record_audio));
+        audio.setImageDrawable(getResources().getDrawable(R.drawable.ic_launcher_record_audio));
+        audio.setPadding(20, 0, 20, 0);
+        audio.setTag(path);
+        audio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                File file = new File(audio.getTag().toString());
+                if (file != null && file.exists()) {
+                    FileOperationUtils.openFile(file, getApplication());
+                } else {
+                    Utils.showToast(mToast, getString(R.string.file_not_exist), getApplicationContext());
+                }
+            }
+        });
+        return audio;
+    }
+
+    private class ButtonOnclickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View arg0) {
+            switch (arg0.getId()) {
+                case BUTTON_CAPTURE_IMAGE:
+                    captureImage();
+                    break;
+                case BUTTON_SELECT_IMAGE:
+                    selectImage();
+                    break;
+                case BUTTON_RECORD_AUDIO:
+                    recordAudio();
+                    break;
+                case BUTTON_SELECT_AUDIO:
+                    selectAudio();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
 }

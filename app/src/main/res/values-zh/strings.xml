@@ -54,4 +54,12 @@
     <string name="task_processing">处理中</string>
     <string name="task_status_not_valid">任务状态不正确，可能该任务已被他人领取</string>
     <string name="task_total_count">当前任务总数</string>
+    <string name="capture_image">拍照并上传</string>
+    <string name="select_image">选择图片并上传</string>
+    <string name="record_audio">录音并上传</string>
+    <string name="select_audio">选择声音并上传</string>
+    <string name="invalid_image">无效的图片文件!</string>
+    <string name="invalid_audio">无效的声音文件!</string>
+    <string name="file_not_exist">选择的文件不存在！</string>
+    <string name="sd_card_not_available">当前存储卡不可用，无法显示图片与声音文件！</string>
 </resources>
