@@ -62,4 +62,7 @@
     <string name="invalid_audio">无效的声音文件!</string>
     <string name="file_not_exist">选择的文件不存在！</string>
     <string name="sd_card_not_available">当前存储卡不可用，无法显示图片与声音文件！</string>
+    <string name="image_upload_succeed">图片上传成功</string>
+    <string name="audio_upload_succeed">录音文件上传成功</string>
+
 </resources>

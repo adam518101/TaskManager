@@ -65,5 +65,7 @@
     <string name="invalid_audio">Invalid audio file!</string>
     <string name="file_not_exist">File is not exist.</string>
     <string name="sd_card_not_available">SD card is not available, images and audios can not display.</string>
+    <string name="image_upload_succeed">Image upload succeed.</string>
+    <string name="audio_upload_succeed">Audio upload succeed.</string>
 
 </resources>

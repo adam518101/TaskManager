@@ -17,17 +17,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.coal.black.bc.socket.client.ClientGlobal;
+import com.coal.black.bc.socket.client.handlers.UploadFileHandler;
 import com.coal.black.bc.socket.client.handlers.UserTaskStatusChangeHandler;
+import com.coal.black.bc.socket.client.returndto.UploadFileResult;
 import com.coal.black.bc.socket.client.returndto.UserTaskStatusChangeResult;
 import com.coal.black.bc.socket.common.UserTaskStatusCommon;
 import com.coal.black.bc.socket.dto.TaskDto;
+import com.coal.black.bc.socket.dto.UploadFileDto;
 import com.coal.black.bc.socket.exception.ExceptionBase;
 import com.talent.taskmanager.file.FileOperationUtils;
 import com.talent.taskmanager.network.NetworkState;
@@ -55,6 +57,9 @@ public class SingleTaskActivity extends Activity {
     private static final String FILE_TYPE_AUDIO = "audio/*";
     private static final String TEMP_FILE_NAME = "image.jpeg";
 
+    private static final int MSG_CHANGE_TASK_STATUS = 1;
+    private static final int MSG_UPLOAD_FILE_SUCCEED = 2;
+
     private Button mBtnCapture = null;
     private Button mBtnSelectImage = null;
     private Button mBtnSoundRecord = null;
@@ -74,28 +79,38 @@ public class SingleTaskActivity extends Activity {
     private Handler mTaskStatusHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
-            Log.d("acmllaugh1", "handleMessage (line 38): get task result.");
-            Utils.dissmissProgressDialog(mProgressDialog);
-            if (msg.obj instanceof UserTaskStatusChangeResult) {
-                UserTaskStatusChangeResult result = (UserTaskStatusChangeResult) msg.obj;
-                //TODO : Whether success or not, reload the task from server(but consider a min time for reload task).
-                if (result.isSuccess()) {
-                    if (msg.arg1 == UserTaskStatusCommon.HAS_READED) {
-                        //We changed a task from unread to readed.
-                    }
-                    if (msg.arg1 == UserTaskStatusCommon.IN_DEALING) {
-                        Utils.showToast(mToast,getString(R.string.task_accept_success), getApplicationContext());
-                    }
-                    mTask.setTaskStatus(msg.arg1);
+            switch(msg.what) {
+                case MSG_CHANGE_TASK_STATUS: {
+                    Log.d("acmllaugh1", "handleMessage (line 38): get task result.");
+                    Utils.dissmissProgressDialog(mProgressDialog);
+                    if (msg.obj instanceof UserTaskStatusChangeResult) {
+                        UserTaskStatusChangeResult result = (UserTaskStatusChangeResult) msg.obj;
+                        //TODO : Whether success or not, reload the task from server(but consider a min time for reload task).
+                        if (result.isSuccess()) {
+                            if (msg.arg1 == UserTaskStatusCommon.HAS_READED) {
+                                //We changed a task from unread to readed.
+                            }
+                            if (msg.arg1 == UserTaskStatusCommon.IN_DEALING) {
+                                Utils.showToast(mToast, getString(R.string.task_accept_success), getApplicationContext());
+                            }
+                            mTask.setTaskStatus(msg.arg1);
 
-                } else {
-                    Log.d("acmllaugh1", "handleMessage (line 38): result error code : " + result.getBusinessErrorCode());
-                    if (result.isBusException() && result.getBusinessErrorCode() == ExceptionBase.USER_TASK_NOT_VALID) {
-                        Utils.showToast(mToast, getString(R.string.task_status_not_valid), getApplicationContext());
-                        SingleTaskActivity.this.finish();
+                        } else {
+                            Log.d("acmllaugh1", "handleMessage (line 38): result error code : " + result.getBusinessErrorCode());
+                            if (result.isBusException() && result.getBusinessErrorCode() == ExceptionBase.USER_TASK_NOT_VALID) {
+                                Utils.showToast(mToast, getString(R.string.task_status_not_valid), getApplicationContext());
+                                SingleTaskActivity.this.finish();
+                            }
+                            // Utils.showToast(mToast, getString(R.string.change_task_status_fail), getApplicationContext());
+                        }
                     }
-                   // Utils.showToast(mToast, getString(R.string.change_task_status_fail), getApplicationContext());
+                    break;
                 }
+                case MSG_UPLOAD_FILE_SUCCEED:
+                    if (msg.obj instanceof Boolean) {
+                        Utils.showToast(mToast, getString((Boolean)msg.obj ? R.string.image_upload_succeed : R.string.audio_upload_succeed), getApplicationContext());
+                    }
+                    break;
             }
         }
     };
@@ -183,6 +198,7 @@ public class SingleTaskActivity extends Activity {
                 UserTaskStatusChangeResult result = handler.changeUserTaskStatus(
                         mTask.getId(), targetStatus);
                 Message msg = new Message();
+                msg.what = MSG_CHANGE_TASK_STATUS;
                 msg.obj = result;
                 msg.arg1 = targetStatus;
                 Log.d("acmllaugh1", "run (line 128): result : " + result.isSuccess());
@@ -353,6 +369,10 @@ public class SingleTaskActivity extends Activity {
         }
         Log.d("Chris", "captureImageResult, path = " + path);
         mGridImages.addView(createImageView(path), mGridImages.getChildCount());
+
+        // upload image to server
+        UploadFileThread uploadFileThread = new UploadFileThread(path, true);
+        uploadFileThread.start();
     }
 
     private void selectImageResult(Intent data) {
@@ -361,12 +381,16 @@ public class SingleTaskActivity extends Activity {
         if (FILE_TYPE_IMAGE.equals(FileOperationUtils.getMIMEType(new File(oldPath)))) {
             Bitmap bitmap = FileOperationUtils.compressImageBySrc(oldPath);
             String name = Utils.getImageName(System.currentTimeMillis());
-            String newPath = mTaskFilePath + "/" + name;
+            final String newPath = mTaskFilePath + "/" + name;
             FileOperationUtils.saveBitmapToFile(bitmap, newPath);
             MediaScannerConnection.scanFile(getApplication(),
                     new String[] { mTaskFilePath }, null, null);
             Log.d("Chris", "selectImageResult, path = " + newPath);
             mGridImages.addView(createImageView(newPath), mGridImages.getChildCount());
+
+            // upload image to server
+            UploadFileThread uploadFileThread = new UploadFileThread(newPath, true);
+            uploadFileThread.start();
         } else {
             Utils.showToast(mToast,getString(R.string.invalid_image), getApplicationContext());
         }
@@ -384,6 +408,10 @@ public class SingleTaskActivity extends Activity {
                 new String[] { mTaskFilePath }, null, null);
         mGridAudios.addView(createAudioView(newPath), mGridAudios.getChildCount());
         Log.d("Chris", "recordAudioResult, path = " + newPath);
+
+        // upload audio to server
+        UploadFileThread uploadFileThread = new UploadFileThread(newPath, false);
+        uploadFileThread.start();
     }
 
     private void selectAudioResult(Intent data) {
@@ -398,6 +426,9 @@ public class SingleTaskActivity extends Activity {
 
             mGridAudios.addView(createAudioView(newPath), mGridAudios.getChildCount());
             Log.d("Chris", "selectAudioResult, path = " + newPath);
+            // upload image to server
+            UploadFileThread uploadFileThread = new UploadFileThread(newPath, false);
+            uploadFileThread.start();
         } else {
             Utils.showToast(mToast,getString(R.string.invalid_audio), getApplicationContext());
         }
@@ -423,8 +454,6 @@ public class SingleTaskActivity extends Activity {
 
     private ImageView createAudioView(String path) {
         final ImageView audio = new ImageView(this);
-        //audio.setImageResource(R.drawable.ic_launcher_record_audio);
-        //audio.setBackground(getResources().getDrawable(R.drawable.ic_launcher_record_audio));
         audio.setImageDrawable(getResources().getDrawable(R.drawable.ic_launcher_record_audio));
         audio.setPadding(20, 0, 20, 0);
         audio.setTag(path);
@@ -463,4 +492,44 @@ public class SingleTaskActivity extends Activity {
             }
         }
     }
+
+    private void upLoadFile(String path, boolean isPicture) {
+        File f = new File(path);
+        UploadFileDto fileDto = new UploadFileDto();
+        fileDto.setClientFile(f);
+        fileDto.setTaskId(mTask.getId());
+        fileDto.setPicture(isPicture);
+        UploadFileHandler uh = new UploadFileHandler();
+        UploadFileResult result = uh.upload(fileDto);
+        Message msg = new Message();
+        if (result.isSuccess()) {
+            msg.what = MSG_UPLOAD_FILE_SUCCEED;
+            msg.obj = isPicture;
+            Log.d("Chris", "upLoadFile, succeed");
+        } else {
+            if (result.isBusException()) {
+                Log.d("Chris", "upLoadFile, Business Exception: " + result.getBusinessErrorCode());
+            } else {
+                Log.d("Chris", "upLoadFile, Other Exception: " + result.getThrowable());
+            }
+        }
+        mTaskStatusHandler.sendMessage(msg);
+    }
+
+    protected class UploadFileThread extends Thread {
+        private String filePath = null;
+        private boolean isPicture;
+        UploadFileThread(String path) {
+            filePath = path;
+        }
+        UploadFileThread(String path, boolean picture) {
+            filePath = path;
+            isPicture = picture;
+        }
+        @Override
+        public void run() {
+            upLoadFile(filePath, isPicture);
+        }
+    }
+
 }
