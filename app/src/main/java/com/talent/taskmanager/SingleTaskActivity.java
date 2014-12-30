@@ -102,6 +102,8 @@ public class SingleTaskActivity extends Activity {
                             }
                             if (msg.arg1 == UserTaskStatusCommon.IN_DEALING) {
                                 Utils.showToast(mToast, getString(R.string.task_accept_success), getApplicationContext());
+
+                                enableShowUploadButtons(true);
                             }
                             mTask.setTaskStatus(msg.arg1);
 
@@ -338,6 +340,11 @@ public class SingleTaskActivity extends Activity {
                 mGridAudios.addView(createAudioView(files[i].getPath()), mGridAudios.getChildCount());
             }
         }
+
+        // Disable to upload file while not in dealing status.
+        if (mTask.getTaskStatus() != UserTaskStatusCommon.IN_DEALING) {
+            enableShowUploadButtons(false);
+        }
     }
 
 
@@ -508,6 +515,12 @@ public class SingleTaskActivity extends Activity {
     private class ButtonOnclickListener implements View.OnClickListener {
         @Override
         public void onClick(View arg0) {
+            NetworkState state = Utils.getCurrentNetworkState(getApplicationContext());
+            if (!state.isConnected()) {
+                Utils.dissmissProgressDialog(mProgressDialog);
+                Utils.showToast(mToast, getString(R.string.net_work_unavailable), getApplicationContext());
+                return;
+            }
             switch (arg0.getId()) {
                 case BUTTON_CAPTURE_IMAGE:
                     captureImage();
@@ -541,6 +554,20 @@ public class SingleTaskActivity extends Activity {
         @Override
         public void onUploadFailed(FileInfo fileInfo) {
             mUploadFileDao.insertUploadFileInfo(fileInfo);
+        }
+    }
+
+    private void enableShowUploadButtons(boolean enable) {
+        if (enable) {
+            mBtnCapture.setVisibility(View.VISIBLE);
+            mBtnSelectImage.setVisibility(View.VISIBLE);
+            mBtnSoundRecord.setVisibility(View.VISIBLE);
+            mBtnSelectAudio.setVisibility(View.VISIBLE);
+        } else {
+            mBtnCapture.setVisibility(View.GONE);
+            mBtnSelectImage.setVisibility(View.GONE);
+            mBtnSoundRecord.setVisibility(View.GONE);
+            mBtnSelectAudio.setVisibility(View.GONE);
         }
     }
 
