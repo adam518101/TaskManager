@@ -28,6 +28,7 @@ import com.coal.black.bc.socket.client.handlers.UserSignHandler;
 import com.coal.black.bc.socket.client.returndto.SignInResult;
 import com.coal.black.bc.socket.dto.SignInDto;
 import com.coal.black.bc.socket.enums.SignInType;
+import com.talent.taskmanager.network.NetworkState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,6 +125,8 @@ public class TaskManagerService extends Service {
                     updateLocationInformation();
 //                    if (!isTaskListInFront()) {
                     getNewTasks();
+
+                    uploadFileIfNeed();
 //                    }
                 }
             } catch (Exception e) {
@@ -228,5 +231,12 @@ public class TaskManagerService extends Service {
         mNotificationManager.notify(NOTIFICATION_ID, notification);
     }
 
+    /**
+     * Query database to find uploaded failed files
+     */
+    private void uploadFileIfNeed() {
+        //TODO: check database
+        Log.d("Chris", "check to upload unfinished files");
+    }
 
 }

@@ -31,7 +31,9 @@ import com.coal.black.bc.socket.common.UserTaskStatusCommon;
 import com.coal.black.bc.socket.dto.TaskDto;
 import com.coal.black.bc.socket.dto.UploadFileDto;
 import com.coal.black.bc.socket.exception.ExceptionBase;
+import com.talent.taskmanager.file.FileInfo;
 import com.talent.taskmanager.file.FileOperationUtils;
+import com.talent.taskmanager.file.UploadFileThread;
 import com.talent.taskmanager.network.NetworkState;
 import com.talent.taskmanager.task.TaskDetailDialog;
 
@@ -67,6 +69,8 @@ public class SingleTaskActivity extends Activity {
     private LinearLayout mGridImages = null;
     private LinearLayout mGridAudios = null;
     private String mTaskFilePath = null;
+    private FileInfo mFileInfo = null;
+    private UploadFileThread mUploadFileThread = null;
     public static final String DIRECTORY = Environment.getExternalStorageDirectory() + "/TaskFiles";
 
     private EventBus mEventBus = EventBus.getDefault();
@@ -275,6 +279,10 @@ public class SingleTaskActivity extends Activity {
         if (mTask == null)
             return;
 
+        mFileInfo = new FileInfo(ClientGlobal.userId, mTask.getId());
+        mUploadFileThread = new UploadFileThread(mFileInfo);
+        mUploadFileThread.setListener(new UploadFileListener());
+
         mTaskFilePath = DIRECTORY + "/" + mTask.getId();
         if (!Utils.isSDCardAvailable()) {
             //TODO:
@@ -371,8 +379,10 @@ public class SingleTaskActivity extends Activity {
         mGridImages.addView(createImageView(path), mGridImages.getChildCount());
 
         // upload image to server
-        UploadFileThread uploadFileThread = new UploadFileThread(path, true);
-        uploadFileThread.start();
+        mFileInfo.setFilePath(path);
+        mFileInfo.setPicture(true);
+        mUploadFileThread.setFileInfo(mFileInfo);
+        mUploadFileThread.start();
     }
 
     private void selectImageResult(Intent data) {
@@ -389,8 +399,10 @@ public class SingleTaskActivity extends Activity {
             mGridImages.addView(createImageView(newPath), mGridImages.getChildCount());
 
             // upload image to server
-            UploadFileThread uploadFileThread = new UploadFileThread(newPath, true);
-            uploadFileThread.start();
+            mFileInfo.setFilePath(newPath);
+            mFileInfo.setPicture(true);
+            mUploadFileThread.setFileInfo(mFileInfo);
+            mUploadFileThread.start();
         } else {
             Utils.showToast(mToast,getString(R.string.invalid_image), getApplicationContext());
         }
@@ -410,8 +422,10 @@ public class SingleTaskActivity extends Activity {
         Log.d("Chris", "recordAudioResult, path = " + newPath);
 
         // upload audio to server
-        UploadFileThread uploadFileThread = new UploadFileThread(newPath, false);
-        uploadFileThread.start();
+        mFileInfo.setFilePath(newPath);
+        mFileInfo.setPicture(false);
+        mUploadFileThread.setFileInfo(mFileInfo);
+        mUploadFileThread.start();
     }
 
     private void selectAudioResult(Intent data) {
@@ -426,9 +440,11 @@ public class SingleTaskActivity extends Activity {
 
             mGridAudios.addView(createAudioView(newPath), mGridAudios.getChildCount());
             Log.d("Chris", "selectAudioResult, path = " + newPath);
-            // upload image to server
-            UploadFileThread uploadFileThread = new UploadFileThread(newPath, false);
-            uploadFileThread.start();
+            // upload audio to server
+            mFileInfo.setFilePath(newPath);
+            mFileInfo.setPicture(false);
+            mUploadFileThread.setFileInfo(mFileInfo);
+            mUploadFileThread.start();
         } else {
             Utils.showToast(mToast,getString(R.string.invalid_audio), getApplicationContext());
         }
@@ -493,42 +509,19 @@ public class SingleTaskActivity extends Activity {
         }
     }
 
-    private void upLoadFile(String path, boolean isPicture) {
-        File f = new File(path);
-        UploadFileDto fileDto = new UploadFileDto();
-        fileDto.setClientFile(f);
-        fileDto.setTaskId(mTask.getId());
-        fileDto.setPicture(isPicture);
-        UploadFileHandler uh = new UploadFileHandler();
-        UploadFileResult result = uh.upload(fileDto);
-        Message msg = new Message();
-        if (result.isSuccess()) {
-            msg.what = MSG_UPLOAD_FILE_SUCCEED;
-            msg.obj = isPicture;
-            Log.d("Chris", "upLoadFile, succeed");
-        } else {
-            if (result.isBusException()) {
-                Log.d("Chris", "upLoadFile, Business Exception: " + result.getBusinessErrorCode());
-            } else {
-                Log.d("Chris", "upLoadFile, Other Exception: " + result.getThrowable());
-            }
-        }
-        mTaskStatusHandler.sendMessage(msg);
-    }
+    private class UploadFileListener implements UploadFileThread.UploadResultListener {
 
-    protected class UploadFileThread extends Thread {
-        private String filePath = null;
-        private boolean isPicture;
-        UploadFileThread(String path) {
-            filePath = path;
-        }
-        UploadFileThread(String path, boolean picture) {
-            filePath = path;
-            isPicture = picture;
-        }
         @Override
-        public void run() {
-            upLoadFile(filePath, isPicture);
+        public void onUploadSucceed(FileInfo fileInfo) {
+            Message msg = new Message();
+            msg.what = MSG_UPLOAD_FILE_SUCCEED;
+            msg.obj = fileInfo.isPicture();
+            mTaskStatusHandler.sendMessage(msg);
+        }
+
+        @Override
+        public void onUploadFailed(FileInfo fileInfo) {
+
         }
     }
 
