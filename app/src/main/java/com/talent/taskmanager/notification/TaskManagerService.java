@@ -5,7 +5,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -23,6 +22,9 @@ import com.coal.black.bc.socket.client.returndto.TaskQryUserNewTaskCountResult;
 import com.talent.taskmanager.Constants;
 import com.talent.taskmanager.R;
 import com.talent.taskmanager.Utils;
+import com.talent.taskmanager.dada.UploadFileDao;
+import com.talent.taskmanager.file.FileInfo;
+import com.talent.taskmanager.file.UploadFileThread;
 import com.talent.taskmanager.location.LocationManager;
 import com.coal.black.bc.socket.client.handlers.UserSignHandler;
 import com.coal.black.bc.socket.client.returndto.SignInResult;
@@ -35,6 +37,7 @@ import java.util.List;
 
 public class TaskManagerService extends Service {
 
+    public static final int UPLOAD_FILE_QUERY_INTERVAL = 5; // every 5 min to query whether there is unfinished file.
     private static final String TASK_NOTIFICATION_SERVICE = "task_notification_service";
     private static final int LOCATION_UPDATE_INTERVAL = 10; // every 5 minutes we update locations to database.
     private static final int NOTIFICATION_ID = 1;
@@ -51,6 +54,9 @@ public class TaskManagerService extends Service {
     private SharedPreferences mPrefs;
     private int mUserID;
     private boolean mServiceIsRunning;
+    private UploadFileDao mUploadFileDao;
+    private UploadFileThread mUploadFileThread;
+    private int mUploadFileCountDown;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -77,6 +83,7 @@ public class TaskManagerService extends Service {
         mLocationHandler = new UserSignHandler();
         mRecordedLocations = new ArrayList<SignInDto>();
         mLocationManager = new LocationManager(this.getApplicationContext(), null);
+        mUploadFileDao = new UploadFileDao(getApplicationContext());
     }
 
     private void registerToTimeCount() {
@@ -127,6 +134,8 @@ public class TaskManagerService extends Service {
                     if (!isTaskListInFront()) {
                         getNewTasks();
                     }
+
+                    uploadFileIfNeed();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -243,8 +252,33 @@ public class TaskManagerService extends Service {
      * Query database to find uploaded failed files
      */
     private void uploadFileIfNeed() {
-        //TODO: check database
-        Log.d("Chris", "check to upload unfinished files");
+        if (mUploadFileCountDown == 0) {
+            mUploadFileCountDown = UPLOAD_FILE_QUERY_INTERVAL;
+            Log.d("Chris", "check to upload unfinished files");
+            FileInfo fileInfo = mUploadFileDao.getUnfinishedFiles();
+            if (fileInfo != null) {
+                mUploadFileThread = new UploadFileThread(fileInfo, getApplicationContext());
+                mUploadFileThread.setListener(new UploadFileListener());
+                mUploadFileThread.start();
+            }
+        } else {
+            mUploadFileCountDown--;
+        }
+
     }
 
+    private class UploadFileListener implements UploadFileThread.UploadResultListener {
+
+        @Override
+        public void onUploadSucceed(FileInfo fileInfo) {
+            Log.d("Chris", "update status, before: unfinished count = " + mUploadFileDao.getUnfinishedFilesCount());
+            mUploadFileDao.updateUploadStatus(fileInfo.getFilePath());
+            Log.d("Chris", "update status, " + fileInfo.getFilePath());
+            Log.d("Chris", "update status, after: unfinished count = " + mUploadFileDao.getUnfinishedFilesCount());
+        }
+
+        @Override
+        public void onUploadFailed(FileInfo fileInfo) {
+        }
+    }
 }

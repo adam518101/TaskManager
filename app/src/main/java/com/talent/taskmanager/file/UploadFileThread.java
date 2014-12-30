@@ -1,11 +1,13 @@
 package com.talent.taskmanager.file;
 
+import android.content.Context;
 import android.os.Message;
 import android.util.Log;
 
 import com.coal.black.bc.socket.client.handlers.UploadFileHandler;
 import com.coal.black.bc.socket.client.returndto.UploadFileResult;
 import com.coal.black.bc.socket.dto.UploadFileDto;
+import com.talent.taskmanager.dada.UploadFileDao;
 
 import java.io.File;
 
@@ -13,16 +15,20 @@ import java.io.File;
  * Created by chris on 14-12-30.
  */
 public class UploadFileThread extends Thread {
+    Context mContext = null;
     FileInfo mFileInfo = null;
     UploadResultListener mListener = null;
+    private UploadFileDao mUploadFileDao = null;
 
     public interface UploadResultListener {
         void onUploadSucceed(FileInfo fileInfo);
         void onUploadFailed(FileInfo fileInfo);
     }
 
-    public UploadFileThread(FileInfo mFileInfo) {
+    public UploadFileThread(FileInfo mFileInfo, Context context) {
         this.mFileInfo = mFileInfo;
+        this.mContext = context;
+        mUploadFileDao = new UploadFileDao(context);
     }
 
     public FileInfo getFileInfo() {
@@ -60,7 +66,7 @@ public class UploadFileThread extends Thread {
             if (mListener != null) {
                 mListener.onUploadSucceed(fileInfo);
             }
-            Log.d("Chris", "upLoadFile, succeed");
+            Log.d("Chris", "upLoadFile, succeed: " + fileInfo);
         } else {
             if (mListener != null) {
                 mListener.onUploadFailed(fileInfo);

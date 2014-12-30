@@ -35,6 +35,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+import com.talent.taskmanager.dada.UploadFileDao;
 import com.talent.taskmanager.file.FileInfo;
 import com.talent.taskmanager.file.FileOperationUtils;
 import com.talent.taskmanager.file.UploadFileThread;
@@ -75,6 +76,7 @@ public class SingleTaskActivity extends Activity {
     private String mTaskFilePath = null;
     private FileInfo mFileInfo = null;
     private UploadFileThread mUploadFileThread = null;
+    private UploadFileDao mUploadFileDao = null;
     public static final String DIRECTORY = Environment.getExternalStorageDirectory() + "/TaskFiles";
 
     private EventBus mEventBus = EventBus.getDefault();
@@ -285,8 +287,9 @@ public class SingleTaskActivity extends Activity {
             return;
 
         mFileInfo = new FileInfo(ClientGlobal.userId, mTask.getId());
-        mUploadFileThread = new UploadFileThread(mFileInfo);
+        mUploadFileThread = new UploadFileThread(mFileInfo, getApplicationContext());
         mUploadFileThread.setListener(new UploadFileListener());
+        mUploadFileDao = new UploadFileDao(getApplicationContext());
 
         mTaskFilePath = DIRECTORY + "/" + mTask.getId();
         if (!Utils.isSDCardAvailable()) {
@@ -479,7 +482,7 @@ public class SingleTaskActivity extends Activity {
             mThumbnailLoader = ImageLoader.getInstance();
         }
         mThumbnailLoader.cancelDisplayTask(image);
-        ImageLoader.getInstance().displayImage(imageUri, image, options, this);
+        ImageLoader.getInstance().displayImage(imageUri, image, options, null);
         return image;
     }
 
@@ -532,11 +535,12 @@ public class SingleTaskActivity extends Activity {
             msg.what = MSG_UPLOAD_FILE_SUCCEED;
             msg.obj = fileInfo.isPicture();
             mTaskStatusHandler.sendMessage(msg);
+            mUploadFileDao.insertUploadFileInfo(fileInfo);
         }
 
         @Override
         public void onUploadFailed(FileInfo fileInfo) {
-
+            mUploadFileDao.insertUploadFileInfo(fileInfo);
         }
     }
 

@@ -62,4 +62,15 @@ public class FileInfo {
     public void setUploadResult(int uploadResult) {
         this.uploadResult = uploadResult;
     }
+
+    @Override
+    public String toString() {
+        return "FileInfo{" +
+                "userId=" + userId +
+                ", taskId=" + taskId +
+                ", filePath='" + filePath + '\'' +
+                ", isPicture=" + isPicture +
+                ", uploadResult=" + uploadResult +
+                '}';
+    }
 }
