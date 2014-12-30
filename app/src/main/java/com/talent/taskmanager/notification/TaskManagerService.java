@@ -77,6 +77,7 @@ public class TaskManagerService extends Service {
         mLocationHandler = new UserSignHandler();
         mRecordedLocations = new ArrayList<SignInDto>();
         mLocationManager = new LocationManager(this.getApplicationContext(), null);
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     private void registerToTimeCount() {

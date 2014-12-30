@@ -479,7 +479,7 @@ public class SingleTaskActivity extends Activity {
             mThumbnailLoader = ImageLoader.getInstance();
         }
         mThumbnailLoader.cancelDisplayTask(image);
-        ImageLoader.getInstance().displayImage(imageUri, image, options, this);
+        ImageLoader.getInstance().displayImage(imageUri, image, options, null);
         return image;
     }
 

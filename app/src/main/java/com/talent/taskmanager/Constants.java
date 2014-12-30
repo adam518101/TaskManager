@@ -18,4 +18,5 @@ public interface Constants {
 
     public static final String LAST_REFRESH_TIME = "last_refresh_time";
     public static final String MAC_ADDRESS = "mac_address";
+    public boolean MAC_ADDRESS_DEBUG_FLAG = false; // When set to false, get mac address from preference, which is unique on every phone.
 }
