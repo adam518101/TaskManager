@@ -2,8 +2,11 @@ package com.talent.taskmanager;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -16,8 +19,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.coal.black.bc.socket.client.ClientGlobal;
 import com.coal.black.bc.socket.client.handlers.UserLoginHandler;
 import com.coal.black.bc.socket.client.returndto.LoginResult;
+import com.coal.black.bc.socket.utils.CommonUtils;
 import com.talent.taskmanager.network.NetworkState;
 
 import de.greenrobot.event.EventBus;
@@ -64,6 +69,7 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         Utils.registerToEventBus(this);
         checkNetWorkConnected();
+        getMACAddress();
         if (getSavedUserID() == -1) { // -1 means no saved user id was found.
             setContentView(R.layout.activity_login);
             checkUpdate();
@@ -74,8 +80,27 @@ public class LoginActivity extends Activity {
         }
     }
 
+    private void getMACAddress() {
+        //We get mac address if there is not one saved in preference.
+        if (mPrefs == null) {
+            mPrefs = getSharedPreferences(Constants.TASK_MANAGER, MODE_PRIVATE);
+        }
+        String macAddress = mPrefs.getString(Constants.MAC_ADDRESS, null);
+        if (macAddress == null) {
+            //Get mac address from system and save it to preference.
+            WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+            WifiInfo info = manager.getConnectionInfo();
+            macAddress = info.getMacAddress();
+            SharedPreferences.Editor editor = mPrefs.edit();
+            editor.putString(Constants.MAC_ADDRESS, macAddress);
+            editor.apply();
+        }
+        ClientGlobal.macStr = macAddress;
+        ClientGlobal.macBytes = CommonUtils.macString2Bytes(macAddress);
+    }
+
     private boolean checkNetWorkConnected() {
-        //Check if there is an available network.
+        //Check if there is an available network
         mNetWorkState = Utils.getCurrentNetworkState(getApplicationContext());
         if (!mNetWorkState.isConnected()) {
             Utils.showToast(mToast, getString(R.string.net_work_unavailable), this);
@@ -91,7 +116,9 @@ public class LoginActivity extends Activity {
     }
 
     private int getSavedUserID() {
-        mPrefs = getSharedPreferences(Constants.TASK_MANAGER, MODE_PRIVATE);
+        if (mPrefs == null) {
+            mPrefs = getSharedPreferences(Constants.TASK_MANAGER, MODE_PRIVATE);
+        }
         mUserID = mPrefs.getInt(Constants.SAVED_USER_ID, -1);
         return mUserID;
     }

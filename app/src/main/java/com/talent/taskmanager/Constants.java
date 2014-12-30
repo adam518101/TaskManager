@@ -17,4 +17,5 @@ public interface Constants {
     public static final int INVALIDATE_USER_ID = -1;
 
     public static final String LAST_REFRESH_TIME = "last_refresh_time";
+    public static final String MAC_ADDRESS = "mac_address";
 }

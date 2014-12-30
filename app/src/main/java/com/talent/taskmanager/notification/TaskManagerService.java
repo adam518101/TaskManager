@@ -37,6 +37,7 @@ public class TaskManagerService extends Service {
     private static final String TASK_NOTIFICATION_SERVICE = "task_notification_service";
     private static final int LOCATION_UPDATE_INTERVAL = 5; // every 5 minutes we update locations to database.
     private static final int NOTIFICATION_ID = 1;
+    public static final int TEN_MINUTES = 600 * 1000;
     private NotificationManager mNotificationManager;
     private PowerManager.WakeLock mWakeLock;
     private StartServiceReceiver mReceiver;
@@ -120,7 +121,7 @@ public class TaskManagerService extends Service {
                     if (!mServiceIsRunning) {
                         break;
                     }
-                    Thread.sleep(10000);
+                    Thread.sleep(TEN_MINUTES);
                     updateLocationInformation();
 //                    if (!isTaskListInFront()) {
                     getNewTasks();
