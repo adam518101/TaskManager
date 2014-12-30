@@ -31,6 +31,10 @@ import com.coal.black.bc.socket.common.UserTaskStatusCommon;
 import com.coal.black.bc.socket.dto.TaskDto;
 import com.coal.black.bc.socket.dto.UploadFileDto;
 import com.coal.black.bc.socket.exception.ExceptionBase;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 import com.talent.taskmanager.file.FileOperationUtils;
 import com.talent.taskmanager.network.NetworkState;
 import com.talent.taskmanager.task.TaskDetailDialog;
@@ -41,7 +45,7 @@ import java.io.IOException;
 import de.greenrobot.event.EventBus;
 
 
-public class SingleTaskActivity extends Activity {
+public class SingleTaskActivity extends Activity implements ImageLoadingListener{
 
     private static final int REQ_CODE_CAPTURE_PICTURE = 101;
     private static final int REQ_CODE_SELECT_PICTURE = 102;
@@ -115,6 +119,16 @@ public class SingleTaskActivity extends Activity {
         }
     };
     private Menu mMenu;
+    private ImageLoader mThumbnailLoader;
+    private Handler mThumbnailHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.obj instanceof ImageView) {
+                ImageView imageView = (ImageView) msg.obj;
+                mGridImages.addView(imageView, mGridImages.getChildCount());
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,6 +153,7 @@ public class SingleTaskActivity extends Activity {
                 }
             }
         });
+        mThumbnailLoader = ImageLoader.getInstance();
     }
 
     private void registerToEventBus() {
@@ -369,7 +384,8 @@ public class SingleTaskActivity extends Activity {
         }
         Log.d("Chris", "captureImageResult, path = " + path);
         mGridImages.addView(createImageView(path), mGridImages.getChildCount());
-
+//        ThumbnailLoaderThread thumbnailLoader = new ThumbnailLoaderThread(path);
+//        thumbnailLoader.start();
         // upload image to server
         UploadFileThread uploadFileThread = new UploadFileThread(path, true);
         uploadFileThread.start();
@@ -387,7 +403,6 @@ public class SingleTaskActivity extends Activity {
                     new String[] { mTaskFilePath }, null, null);
             Log.d("Chris", "selectImageResult, path = " + newPath);
             mGridImages.addView(createImageView(newPath), mGridImages.getChildCount());
-
             // upload image to server
             UploadFileThread uploadFileThread = new UploadFileThread(newPath, true);
             uploadFileThread.start();
@@ -436,7 +451,10 @@ public class SingleTaskActivity extends Activity {
 
     private ImageView createImageView(String path) {
         final ImageView image = new ImageView(this);
-        image.setImageURI(Uri.parse(path));
+        //image.setImageURI(Uri.parse(path));
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                getResources().getDimensionPixelSize(R.dimen.image_width), getResources().getDimensionPixelSize(R.dimen.image_height));
+        image.setLayoutParams(layoutParams);
         image.setPadding(5, 0, 5, 0);
         image.setTag(path);
         image.setOnClickListener(new View.OnClickListener() {
@@ -449,6 +467,14 @@ public class SingleTaskActivity extends Activity {
                 startActivity(intent);
             }
         });
+        DisplayImageOptions options = ImageLoaderUtil.getOption();
+        String imageUri = "file://" + path;
+        Log.d("Chris", "createImageView (line 458): image uri : " + imageUri);
+        if (mThumbnailLoader == null || !mThumbnailLoader.isInited()) {
+            mThumbnailLoader = ImageLoader.getInstance();
+        }
+        mThumbnailLoader.cancelDisplayTask(image);
+        ImageLoader.getInstance().displayImage(imageUri, image, options, this);
         return image;
     }
 
@@ -469,6 +495,26 @@ public class SingleTaskActivity extends Activity {
             }
         });
         return audio;
+    }
+
+    @Override
+    public void onLoadingStarted(String s, View view) {
+
+    }
+
+    @Override
+    public void onLoadingFailed(String s, View view, FailReason failReason) {
+
+    }
+
+    @Override
+    public void onLoadingComplete(String s, View view, Bitmap bitmap) {
+
+    }
+
+    @Override
+    public void onLoadingCancelled(String s, View view) {
+
     }
 
     private class ButtonOnclickListener implements View.OnClickListener {
@@ -529,6 +575,21 @@ public class SingleTaskActivity extends Activity {
         @Override
         public void run() {
             upLoadFile(filePath, isPicture);
+        }
+    }
+
+    protected class ThumbnailLoaderThread extends Thread {
+        private final String imagePath;
+
+        public ThumbnailLoaderThread(String imagePath) {
+            this.imagePath = imagePath;
+        }
+
+        @Override
+        public void run() {
+            Message msg = new Message();
+            msg.obj = createImageView(imagePath);
+            mThumbnailHandler.sendMessage(msg);
         }
     }
 

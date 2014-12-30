@@ -27,4 +27,5 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.github.androidprogresslayout:library:1.1@aar'
     compile 'de.greenrobot:eventbus:2.4.0'
+    compile files('libs/universal-image-loader-1.9.3.jar')
 }

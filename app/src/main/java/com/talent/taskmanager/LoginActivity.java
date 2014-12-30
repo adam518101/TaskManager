@@ -69,7 +69,7 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         Utils.registerToEventBus(this);
         checkNetWorkConnected();
-        getMACAddress();
+        //getMACAddress();
         if (getSavedUserID() == -1) { // -1 means no saved user id was found.
             setContentView(R.layout.activity_login);
             checkUpdate();

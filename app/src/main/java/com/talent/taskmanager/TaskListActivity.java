@@ -127,6 +127,7 @@ public class TaskListActivity extends Activity {
                 startActivity(intent);
             }
         });
+        ImageLoaderUtil.initImageLoader(getApplicationContext());
     }
 
     private void initUserIDFromIntent() {
