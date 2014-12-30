@@ -8,7 +8,9 @@ public class TestQryNewTaskCountHandler {
 	public static void main(String[] args) {
 		ClientGlobal.userId = 11;
 		TaskQryUserNewTaskHandler handler = new TaskQryUserNewTaskHandler();
-		TaskQryUserNewTaskCountResult countResult = handler.qryNewTaskCount(1419657487665L);
+        long time = 1419923417454l;
+        System.out.println(time);
+        TaskQryUserNewTaskCountResult countResult = handler.qryNewTaskCount(time);
 		if (countResult.isSuccess()) {
 			System.out.println("Success, result count is " + countResult.getCount());
 		} else {

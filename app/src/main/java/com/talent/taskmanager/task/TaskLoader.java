@@ -16,9 +16,12 @@ public class TaskLoader extends AsyncTaskLoader<ArrayList<TaskDto>> {
 
     private ArrayList<TaskDto> mTaskList;
     private TaskObserver mTaskObserver;
+    private Context mContext;
 
-    public TaskLoader(Context context) {
+    public TaskLoader(Context context)
+    {
         super(context);
+        mContext = context;
     }
 
     @Override
@@ -41,7 +44,7 @@ public class TaskLoader extends AsyncTaskLoader<ArrayList<TaskDto>> {
         }
 
         if (mTaskObserver == null) {
-            mTaskObserver = new TaskObserver();
+            mTaskObserver = new TaskObserver(this, mContext);
         }
 
         if (takeContentChanged() || mTaskList == null) {

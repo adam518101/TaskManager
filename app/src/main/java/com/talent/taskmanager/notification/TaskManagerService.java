@@ -22,7 +22,6 @@ import com.coal.black.bc.socket.client.handlers.TaskQryUserNewTaskHandler;
 import com.coal.black.bc.socket.client.returndto.TaskQryUserNewTaskCountResult;
 import com.talent.taskmanager.Constants;
 import com.talent.taskmanager.R;
-import com.talent.taskmanager.Utils;
 import com.talent.taskmanager.location.LocationManager;
 import com.coal.black.bc.socket.client.handlers.UserSignHandler;
 import com.coal.black.bc.socket.client.returndto.SignInResult;
@@ -35,9 +34,9 @@ import java.util.List;
 public class TaskManagerService extends Service {
 
     private static final String TASK_NOTIFICATION_SERVICE = "task_notification_service";
-    private static final int LOCATION_UPDATE_INTERVAL = 5; // every 5 minutes we update locations to database.
+    private static final int LOCATION_UPDATE_INTERVAL = 10; // every 5 minutes we update locations to database.
     private static final int NOTIFICATION_ID = 1;
-    public static final int TEN_MINUTES = 600 * 1000;
+    public static final int ONE_MINUTES = 60 * 1000;
     private NotificationManager mNotificationManager;
     private PowerManager.WakeLock mWakeLock;
     private StartServiceReceiver mReceiver;
@@ -76,6 +75,7 @@ public class TaskManagerService extends Service {
         mLocationHandler = new UserSignHandler();
         mRecordedLocations = new ArrayList<SignInDto>();
         mLocationManager = new LocationManager(this.getApplicationContext(), null);
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     private void registerToTimeCount() {
@@ -121,11 +121,11 @@ public class TaskManagerService extends Service {
                     if (!mServiceIsRunning) {
                         break;
                     }
-                    Thread.sleep(TEN_MINUTES);
+                    Thread.sleep(ONE_MINUTES);
                     updateLocationInformation();
-//                    if (!isTaskListInFront()) {
-                    getNewTasks();
-//                    }
+                    if (!isTaskListInFront()) {
+                        getNewTasks();
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -142,15 +142,23 @@ public class TaskManagerService extends Service {
 
     private void getNewTasks() {
         // Check if there is a new task.
-//        long lashRefreshTime = getLastRefreshTime();
-//        TaskQryUserNewTaskHandler handler = new TaskQryUserNewTaskHandler();
-//        TaskQryUserNewTaskCountResult countResult = handler.qryNewTaskCount(lashRefreshTime);
-//        if (countResult.isSuccess() && countResult.getCount() > 0) {
-//            Log.d("acmllaugh1", "we get a new task.");
-//            showNotification(countResult.getCount());
-//        } else {
-//            Log.d("acmllaugh1", "refresh task failed." +countResult.getThrowable().getMessage());
-//        }
+        long lastRefreshTime = getLastRefreshTime();
+        TaskQryUserNewTaskCountResult countResult = null;
+        TaskQryUserNewTaskHandler handler = new TaskQryUserNewTaskHandler();
+        countResult = handler.qryNewTaskCount(lastRefreshTime);
+        if (countResult.isSuccess()) {
+            if(countResult.getCount() > 0) {
+                showNotification(countResult.getCount());
+            }else{
+                try {
+                    mNotificationManager.cancel(NOTIFICATION_ID);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        } else {
+            Log.d("acmllaugh1", "refresh task failed." +countResult.getThrowable().getMessage());
+        }
     }
 
     private long getLastRefreshTime() {
@@ -159,21 +167,19 @@ public class TaskManagerService extends Service {
     }
 
     private void updateLocationInformation() {
-        SignInDto dto = new SignInDto();
-        Location location = mLocationManager.getCurrentLocation();
-        if (location == null) {
-            Log.d("acmllaugh1", "updateLocationInformation (line 120): location is null. user id is : " + ClientGlobal.userId);
-            return;
-        }
-        dto.setLatitude(location.getLatitude());
-        dto.setLongitude(location.getLongitude());
-        dto.setTime(System.currentTimeMillis());
-        dto.setType(SignInType.ReportPosition);
-        mRecordedLocations.add(dto);
-        if (mLastUpdateSuccess) {
-            mUpdateCountDown--;
-        }
-        if (mUpdateCountDown <= 0 || !mLastUpdateSuccess) {
+        if (mUpdateCountDown <= 0) {
+            Log.d("acmllaugh1", "updateLocationInformation (line 169): start upload locations.");
+            SignInDto dto = new SignInDto();
+            Location location = mLocationManager.getCurrentLocation();
+            if (location == null) {
+                Log.d("acmllaugh1", "updateLocationInformation (line 120): location is null. user id is : " + ClientGlobal.userId);
+                return;
+            }
+            dto.setLatitude(location.getLatitude());
+            dto.setLongitude(location.getLongitude());
+            dto.setTime(System.currentTimeMillis());
+            dto.setType(SignInType.ReportPosition);
+            mRecordedLocations.add(dto);
             Log.d("acmllaugh1", "update location. Current userid ; " + ClientGlobal.userId);
             SignInResult result = mLocationHandler.signIn(mRecordedLocations);
             if (result.isSuccess()) {
@@ -182,9 +188,13 @@ public class TaskManagerService extends Service {
                 mUpdateCountDown = LOCATION_UPDATE_INTERVAL;
                 Log.d("acmllaugh1", "updateLocationInformation (line 153): upload location information success.");
                 return;
+            }else{
+                mLastUpdateSuccess = false;
+                mRecordedLocations.clear();
+                Log.d("acmllaugh1", "updateLocationInformation (line 155): upload location failed.");
             }
-            mLastUpdateSuccess = false;
-            Log.d("acmllaugh1", "updateLocationInformation (line 155): upload location failed.");
+        }else{
+            mUpdateCountDown--;
         }
     }
 
@@ -210,7 +220,6 @@ public class TaskManagerService extends Service {
     private void showNotification(int i) {
         Intent emptyIntent = new Intent();
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, emptyIntent, 0);
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         int icon = android.R.drawable.stat_notify_chat;
         CharSequence text = getString(R.string.new_task_coming) + " " + i;
         long when = System.currentTimeMillis();
