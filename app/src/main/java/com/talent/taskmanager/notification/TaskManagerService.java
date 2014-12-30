@@ -5,6 +5,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -83,6 +84,7 @@ public class TaskManagerService extends Service {
         mLocationHandler = new UserSignHandler();
         mRecordedLocations = new ArrayList<SignInDto>();
         mLocationManager = new LocationManager(this.getApplicationContext(), null);
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mUploadFileDao = new UploadFileDao(getApplicationContext());
     }
 

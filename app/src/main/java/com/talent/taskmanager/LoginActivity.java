@@ -69,7 +69,9 @@ public class LoginActivity extends Activity {
         super.onCreate(savedInstanceState);
         Utils.registerToEventBus(this);
         checkNetWorkConnected();
-        //getMACAddress();
+        if (!Constants.MAC_ADDRESS_DEBUG_FLAG) {
+            getMACAddress();
+        }
         if (getSavedUserID() == -1) { // -1 means no saved user id was found.
             setContentView(R.layout.activity_login);
             checkUpdate();
@@ -97,6 +99,7 @@ public class LoginActivity extends Activity {
         }
         ClientGlobal.macStr = macAddress;
         ClientGlobal.macBytes = CommonUtils.macString2Bytes(macAddress);
+
     }
 
     private boolean checkNetWorkConnected() {
