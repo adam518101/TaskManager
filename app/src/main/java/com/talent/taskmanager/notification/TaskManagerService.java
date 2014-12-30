@@ -22,11 +22,13 @@ import com.coal.black.bc.socket.client.handlers.TaskQryUserNewTaskHandler;
 import com.coal.black.bc.socket.client.returndto.TaskQryUserNewTaskCountResult;
 import com.talent.taskmanager.Constants;
 import com.talent.taskmanager.R;
+import com.talent.taskmanager.Utils;
 import com.talent.taskmanager.location.LocationManager;
 import com.coal.black.bc.socket.client.handlers.UserSignHandler;
 import com.coal.black.bc.socket.client.returndto.SignInResult;
 import com.coal.black.bc.socket.dto.SignInDto;
 import com.coal.black.bc.socket.enums.SignInType;
+import com.talent.taskmanager.network.NetworkState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +77,6 @@ public class TaskManagerService extends Service {
         mLocationHandler = new UserSignHandler();
         mRecordedLocations = new ArrayList<SignInDto>();
         mLocationManager = new LocationManager(this.getApplicationContext(), null);
-        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     private void registerToTimeCount() {
@@ -238,5 +239,12 @@ public class TaskManagerService extends Service {
         mNotificationManager.notify(NOTIFICATION_ID, notification);
     }
 
+    /**
+     * Query database to find uploaded failed files
+     */
+    private void uploadFileIfNeed() {
+        //TODO: check database
+        Log.d("Chris", "check to upload unfinished files");
+    }
 
 }

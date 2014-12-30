@@ -35,7 +35,9 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;
 import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
+import com.talent.taskmanager.file.FileInfo;
 import com.talent.taskmanager.file.FileOperationUtils;
+import com.talent.taskmanager.file.UploadFileThread;
 import com.talent.taskmanager.network.NetworkState;
 import com.talent.taskmanager.task.TaskDetailDialog;
 
@@ -45,7 +47,7 @@ import java.io.IOException;
 import de.greenrobot.event.EventBus;
 
 
-public class SingleTaskActivity extends Activity implements ImageLoadingListener{
+public class SingleTaskActivity extends Activity {
 
     private static final int REQ_CODE_CAPTURE_PICTURE = 101;
     private static final int REQ_CODE_SELECT_PICTURE = 102;
@@ -71,6 +73,8 @@ public class SingleTaskActivity extends Activity implements ImageLoadingListener
     private LinearLayout mGridImages = null;
     private LinearLayout mGridAudios = null;
     private String mTaskFilePath = null;
+    private FileInfo mFileInfo = null;
+    private UploadFileThread mUploadFileThread = null;
     public static final String DIRECTORY = Environment.getExternalStorageDirectory() + "/TaskFiles";
 
     private EventBus mEventBus = EventBus.getDefault();
@@ -120,15 +124,6 @@ public class SingleTaskActivity extends Activity implements ImageLoadingListener
     };
     private Menu mMenu;
     private ImageLoader mThumbnailLoader;
-    private Handler mThumbnailHandler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.obj instanceof ImageView) {
-                ImageView imageView = (ImageView) msg.obj;
-                mGridImages.addView(imageView, mGridImages.getChildCount());
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,7 +148,6 @@ public class SingleTaskActivity extends Activity implements ImageLoadingListener
                 }
             }
         });
-        mThumbnailLoader = ImageLoader.getInstance();
     }
 
     private void registerToEventBus() {
@@ -290,6 +284,10 @@ public class SingleTaskActivity extends Activity implements ImageLoadingListener
         if (mTask == null)
             return;
 
+        mFileInfo = new FileInfo(ClientGlobal.userId, mTask.getId());
+        mUploadFileThread = new UploadFileThread(mFileInfo);
+        mUploadFileThread.setListener(new UploadFileListener());
+
         mTaskFilePath = DIRECTORY + "/" + mTask.getId();
         if (!Utils.isSDCardAvailable()) {
             //TODO:
@@ -384,11 +382,12 @@ public class SingleTaskActivity extends Activity implements ImageLoadingListener
         }
         Log.d("Chris", "captureImageResult, path = " + path);
         mGridImages.addView(createImageView(path), mGridImages.getChildCount());
-//        ThumbnailLoaderThread thumbnailLoader = new ThumbnailLoaderThread(path);
-//        thumbnailLoader.start();
+
         // upload image to server
-        UploadFileThread uploadFileThread = new UploadFileThread(path, true);
-        uploadFileThread.start();
+        mFileInfo.setFilePath(path);
+        mFileInfo.setPicture(true);
+        mUploadFileThread.setFileInfo(mFileInfo);
+        mUploadFileThread.start();
     }
 
     private void selectImageResult(Intent data) {
@@ -404,8 +403,10 @@ public class SingleTaskActivity extends Activity implements ImageLoadingListener
             Log.d("Chris", "selectImageResult, path = " + newPath);
             mGridImages.addView(createImageView(newPath), mGridImages.getChildCount());
             // upload image to server
-            UploadFileThread uploadFileThread = new UploadFileThread(newPath, true);
-            uploadFileThread.start();
+            mFileInfo.setFilePath(newPath);
+            mFileInfo.setPicture(true);
+            mUploadFileThread.setFileInfo(mFileInfo);
+            mUploadFileThread.start();
         } else {
             Utils.showToast(mToast,getString(R.string.invalid_image), getApplicationContext());
         }
@@ -425,8 +426,10 @@ public class SingleTaskActivity extends Activity implements ImageLoadingListener
         Log.d("Chris", "recordAudioResult, path = " + newPath);
 
         // upload audio to server
-        UploadFileThread uploadFileThread = new UploadFileThread(newPath, false);
-        uploadFileThread.start();
+        mFileInfo.setFilePath(newPath);
+        mFileInfo.setPicture(false);
+        mUploadFileThread.setFileInfo(mFileInfo);
+        mUploadFileThread.start();
     }
 
     private void selectAudioResult(Intent data) {
@@ -441,9 +444,11 @@ public class SingleTaskActivity extends Activity implements ImageLoadingListener
 
             mGridAudios.addView(createAudioView(newPath), mGridAudios.getChildCount());
             Log.d("Chris", "selectAudioResult, path = " + newPath);
-            // upload image to server
-            UploadFileThread uploadFileThread = new UploadFileThread(newPath, false);
-            uploadFileThread.start();
+            // upload audio to server
+            mFileInfo.setFilePath(newPath);
+            mFileInfo.setPicture(false);
+            mUploadFileThread.setFileInfo(mFileInfo);
+            mUploadFileThread.start();
         } else {
             Utils.showToast(mToast,getString(R.string.invalid_audio), getApplicationContext());
         }
@@ -497,26 +502,6 @@ public class SingleTaskActivity extends Activity implements ImageLoadingListener
         return audio;
     }
 
-    @Override
-    public void onLoadingStarted(String s, View view) {
-
-    }
-
-    @Override
-    public void onLoadingFailed(String s, View view, FailReason failReason) {
-
-    }
-
-    @Override
-    public void onLoadingComplete(String s, View view, Bitmap bitmap) {
-
-    }
-
-    @Override
-    public void onLoadingCancelled(String s, View view) {
-
-    }
-
     private class ButtonOnclickListener implements View.OnClickListener {
         @Override
         public void onClick(View arg0) {
@@ -539,57 +524,19 @@ public class SingleTaskActivity extends Activity implements ImageLoadingListener
         }
     }
 
-    private void upLoadFile(String path, boolean isPicture) {
-        File f = new File(path);
-        UploadFileDto fileDto = new UploadFileDto();
-        fileDto.setClientFile(f);
-        fileDto.setTaskId(mTask.getId());
-        fileDto.setPicture(isPicture);
-        UploadFileHandler uh = new UploadFileHandler();
-        UploadFileResult result = uh.upload(fileDto);
-        Message msg = new Message();
-        if (result.isSuccess()) {
-            msg.what = MSG_UPLOAD_FILE_SUCCEED;
-            msg.obj = isPicture;
-            Log.d("Chris", "upLoadFile, succeed");
-        } else {
-            if (result.isBusException()) {
-                Log.d("Chris", "upLoadFile, Business Exception: " + result.getBusinessErrorCode());
-            } else {
-                Log.d("Chris", "upLoadFile, Other Exception: " + result.getThrowable());
-            }
-        }
-        mTaskStatusHandler.sendMessage(msg);
-    }
-
-    protected class UploadFileThread extends Thread {
-        private String filePath = null;
-        private boolean isPicture;
-        UploadFileThread(String path) {
-            filePath = path;
-        }
-        UploadFileThread(String path, boolean picture) {
-            filePath = path;
-            isPicture = picture;
-        }
-        @Override
-        public void run() {
-            upLoadFile(filePath, isPicture);
-        }
-    }
-
-    protected class ThumbnailLoaderThread extends Thread {
-        private final String imagePath;
-
-        public ThumbnailLoaderThread(String imagePath) {
-            this.imagePath = imagePath;
-        }
+    private class UploadFileListener implements UploadFileThread.UploadResultListener {
 
         @Override
-        public void run() {
+        public void onUploadSucceed(FileInfo fileInfo) {
             Message msg = new Message();
-            msg.obj = createImageView(imagePath);
-            mThumbnailHandler.sendMessage(msg);
+            msg.what = MSG_UPLOAD_FILE_SUCCEED;
+            msg.obj = fileInfo.isPicture();
+            mTaskStatusHandler.sendMessage(msg);
+        }
+
+        @Override
+        public void onUploadFailed(FileInfo fileInfo) {
+
         }
     }
 
