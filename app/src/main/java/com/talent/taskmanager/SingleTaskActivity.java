@@ -157,13 +157,21 @@ public class SingleTaskActivity extends Activity {
     private void registerToEventBus() {
         if (!mEventBus.isRegistered(this)) {
             //mEventBus.register(this);
-            mEventBus.registerSticky(this);
+            try {
+                mEventBus.registerSticky(this);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
     private void unRegisterEventBus() {
         if (mEventBus.isRegistered(this)) {
-            mEventBus.unregister(this);
+            try {
+                mEventBus.unregister(this);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
