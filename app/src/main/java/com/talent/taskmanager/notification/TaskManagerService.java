@@ -56,7 +56,7 @@ public class TaskManagerService extends Service {
     private int mUserID;
     private boolean mServiceIsRunning;
     private UploadFileDao mUploadFileDao;
-    private UploadFileThread mUploadFileThread;
+    private UploadFileListener mUploadListener = null;
     private int mUploadFileCountDown;
 
     @Override
@@ -86,6 +86,7 @@ public class TaskManagerService extends Service {
         mLocationManager = new LocationManager(this.getApplicationContext(), null);
         mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mUploadFileDao = new UploadFileDao(getApplicationContext());
+        mUploadListener = new UploadFileListener();
     }
 
     private void registerToTimeCount() {
@@ -259,9 +260,9 @@ public class TaskManagerService extends Service {
             Log.d("Chris", "check to upload unfinished files");
             FileInfo fileInfo = mUploadFileDao.getUnfinishedFiles();
             if (fileInfo != null) {
-                mUploadFileThread = new UploadFileThread(fileInfo, getApplicationContext());
-                mUploadFileThread.setListener(new UploadFileListener());
-                mUploadFileThread.start();
+                UploadFileThread uploadFileThread = new UploadFileThread(fileInfo, getApplicationContext());
+                uploadFileThread.setListener(mUploadListener);
+                uploadFileThread.start();
             }
         } else {
             mUploadFileCountDown--;

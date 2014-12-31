@@ -75,8 +75,8 @@ public class SingleTaskActivity extends Activity {
     private LinearLayout mGridAudios = null;
     private String mTaskFilePath = null;
     private FileInfo mFileInfo = null;
-    private UploadFileThread mUploadFileThread = null;
     private UploadFileDao mUploadFileDao = null;
+    private UploadFileListener mUploadListener = null;
     public static final String DIRECTORY = Environment.getExternalStorageDirectory() + "/TaskFiles";
 
     private EventBus mEventBus = EventBus.getDefault();
@@ -289,9 +289,8 @@ public class SingleTaskActivity extends Activity {
             return;
 
         mFileInfo = new FileInfo(ClientGlobal.userId, mTask.getId());
-        mUploadFileThread = new UploadFileThread(mFileInfo, getApplicationContext());
-        mUploadFileThread.setListener(new UploadFileListener());
         mUploadFileDao = new UploadFileDao(getApplicationContext());
+        mUploadListener = new UploadFileListener();
 
         mTaskFilePath = DIRECTORY + "/" + mTask.getId();
         if (!Utils.isSDCardAvailable()) {
@@ -396,8 +395,7 @@ public class SingleTaskActivity extends Activity {
         // upload image to server
         mFileInfo.setFilePath(path);
         mFileInfo.setPicture(true);
-        mUploadFileThread.setFileInfo(mFileInfo);
-        mUploadFileThread.start();
+        startUploadFile(mFileInfo);
     }
 
     private void selectImageResult(Intent data) {
@@ -415,8 +413,7 @@ public class SingleTaskActivity extends Activity {
             // upload image to server
             mFileInfo.setFilePath(newPath);
             mFileInfo.setPicture(true);
-            mUploadFileThread.setFileInfo(mFileInfo);
-            mUploadFileThread.start();
+            startUploadFile(mFileInfo);
         } else {
             Utils.showToast(mToast,getString(R.string.invalid_image), getApplicationContext());
         }
@@ -438,8 +435,7 @@ public class SingleTaskActivity extends Activity {
         // upload audio to server
         mFileInfo.setFilePath(newPath);
         mFileInfo.setPicture(false);
-        mUploadFileThread.setFileInfo(mFileInfo);
-        mUploadFileThread.start();
+        startUploadFile(mFileInfo);
     }
 
     private void selectAudioResult(Intent data) {
@@ -457,8 +453,7 @@ public class SingleTaskActivity extends Activity {
             // upload audio to server
             mFileInfo.setFilePath(newPath);
             mFileInfo.setPicture(false);
-            mUploadFileThread.setFileInfo(mFileInfo);
-            mUploadFileThread.start();
+            startUploadFile(mFileInfo);
         } else {
             Utils.showToast(mToast,getString(R.string.invalid_audio), getApplicationContext());
         }
@@ -548,11 +543,14 @@ public class SingleTaskActivity extends Activity {
             msg.what = MSG_UPLOAD_FILE_SUCCEED;
             msg.obj = fileInfo.isPicture();
             mTaskStatusHandler.sendMessage(msg);
+            // set result to 1 as finished
+            fileInfo.setUploadResult(1);
             mUploadFileDao.insertUploadFileInfo(fileInfo);
         }
 
         @Override
         public void onUploadFailed(FileInfo fileInfo) {
+            fileInfo.setUploadResult(0);
             mUploadFileDao.insertUploadFileInfo(fileInfo);
         }
     }
@@ -569,6 +567,12 @@ public class SingleTaskActivity extends Activity {
             mBtnSoundRecord.setVisibility(View.GONE);
             mBtnSelectAudio.setVisibility(View.GONE);
         }
+    }
+
+    private void startUploadFile(FileInfo fileInfo) {
+        UploadFileThread uploadFileThread = new UploadFileThread(fileInfo, getApplicationContext());
+        uploadFileThread.setListener(mUploadListener);
+        uploadFileThread.start();
     }
 
 }
