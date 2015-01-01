@@ -1,7 +1,5 @@
 package com.coal.black.bc.socket.client.handlers;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +26,7 @@ public class TaskQryUserNewTaskHandler {
 		TaskQryUserNewTaskDto queryDto = new TaskQryUserNewTaskDto();
 		queryDto.setLastGrantTime(lastGrantTime);
 		lists.add(queryDto);
-		BasicResult result = socketClient.deal(OperateType.TaskQryUserNewTaskCount, ClientGlobal.userId, lists, this);
+		BasicResult result = socketClient.deal(OperateType.TaskQryUserNewTaskCount, ClientGlobal.getUserId(), lists, this);
 		if (result instanceof TaskQryUserNewTaskCountResult) {
 			return (TaskQryUserNewTaskCountResult) result;
 		} else {
@@ -50,7 +48,7 @@ public class TaskQryUserNewTaskHandler {
 		TaskQryUserNewTaskDto queryDto = new TaskQryUserNewTaskDto();
 		queryDto.setLastGrantTime(lastGrantTime);
 		lists.add(queryDto);
-		BasicResult result = socketClient.deal(OperateType.TaskQryUserNewTaskList, ClientGlobal.userId, lists, this);
+		BasicResult result = socketClient.deal(OperateType.TaskQryUserNewTaskList, ClientGlobal.getUserId(), lists, this);
 		if (result instanceof TaskQryUserNewTaskListResult) {
 			return (TaskQryUserNewTaskListResult) result;
 		} else {

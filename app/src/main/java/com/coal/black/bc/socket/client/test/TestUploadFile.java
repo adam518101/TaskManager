@@ -14,7 +14,7 @@ public class TestUploadFile {
 		fileDto.setClientFile(f);
 		fileDto.setTaskId(1);
 		fileDto.setPicture(false);
-		ClientGlobal.userId = 11;
+		ClientGlobal.setUserId(11);
 		UploadFileHandler uh = new UploadFileHandler();
 		UploadFileResult result = uh.upload(fileDto);
 		if (result.isSuccess()) {

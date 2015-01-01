@@ -17,7 +17,7 @@ public class TaskQueryByTaskIDHandler {
 		TaskQueryByTaskIDDto queryDto = new TaskQueryByTaskIDDto();
 		queryDto.setTaskId(taskID);
 		lists.add(queryDto);
-		BasicResult result = socketClient.deal(OperateType.TaskQryByID, ClientGlobal.userId, lists, this);
+		BasicResult result = socketClient.deal(OperateType.TaskQryByID, ClientGlobal.getUserId(), lists, this);
 		if (result instanceof TaskQueryByTaskIDResult) {
 			return (TaskQueryByTaskIDResult) result;
 		} else {

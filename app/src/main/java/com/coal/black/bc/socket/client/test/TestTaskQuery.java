@@ -7,7 +7,7 @@ import com.coal.black.bc.socket.client.returndto.TaskQueryResult;
 public class TestTaskQuery {
 	public static void main(String[] args) {
 		for (int i = 0; i < 10; i++) {
-			ClientGlobal.userId = 11;
+			ClientGlobal.setUserId(11);
 			int[] status = new int[] { 1, 2, 3 };// 状态
 			TaskQueryHandler taskQueryHandler = new TaskQueryHandler();
 			TaskQueryResult result = taskQueryHandler.qryTasks(status);// 查询任务

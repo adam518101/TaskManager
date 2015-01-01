@@ -9,7 +9,9 @@ public enum OperateType {
 	UserTaskStatusChange((byte) 5), // 用户任务的状态改变
 	TaskQryUserNewTaskCount((byte) 6), // 查询用户新的任务的数量
 	TaskQryUserNewTaskList((byte) 7), // 查询用户新的任务的列表
-	TaskQryByID((byte) 8);// 根据用户Id查询任务列表信息
+	TaskQryByID((byte) 8), // 根据用户Id查询任务列表信息
+	ChangePwd((byte) 9), // 修改用户密码
+	CommitTask((byte) 10);// 提交任务
 
 	private byte value;
 
@@ -39,6 +41,10 @@ public enum OperateType {
 			return TaskQryUserNewTaskList;
 		case 8:
 			return TaskQryByID;
+		case 9:
+			return ChangePwd;
+		case 10:
+			return CommitTask;// 提交任务
 		default:
 			return Error;
 		}

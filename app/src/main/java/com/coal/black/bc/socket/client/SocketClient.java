@@ -8,6 +8,8 @@ import java.util.List;
 
 import com.coal.black.bc.socket.Constants;
 import com.coal.black.bc.socket.IDtoBase;
+import com.coal.black.bc.socket.client.deal.ChangePwdDeal;
+import com.coal.black.bc.socket.client.deal.CommitTaskDeal;
 import com.coal.black.bc.socket.client.deal.LoginDeal;
 import com.coal.black.bc.socket.client.deal.SignInDeal;
 import com.coal.black.bc.socket.client.deal.TaskQryUserNewTaskCountDeal;
@@ -43,9 +45,9 @@ public class SocketClient {
 	public BasicResult deal(OperateType operateType, int userId, List<IDtoBase> objDtoList, Object handler) {
 		ClientInfoDto clientDto = new ClientInfoDto();
 		clientDto.setBeginFlag(Constants.SERVER_BEGIN_FLAG);
-		clientDto.setMac(ClientGlobal.macBytes);
+		clientDto.setMac(ClientGlobal.getMacBytes());
 		if (userId <= 0) {
-			clientDto.setUserId(ClientGlobal.userId);
+			clientDto.setUserId(ClientGlobal.getUserId());
 		} else {
 			clientDto.setUserId(userId);
 		}
@@ -55,10 +57,10 @@ public class SocketClient {
 		InputStream in = null;
 		try {
 			socket = new Socket();
-			socket.connect(ClientGlobal.address, ClientGlobal.socketTimeOut);
+			socket.connect(ClientGlobal.address, ClientGlobal.getSocketTimeOut());
 			socket.setSoLinger(true, 5);
 			socket.setTcpNoDelay(true);
-			socket.setSoTimeout(ClientGlobal.socketTimeOut);
+			socket.setSoTimeout(ClientGlobal.getSocketTimeOut());
 			out = socket.getOutputStream();
 			in = socket.getInputStream();
 			switch (operateType) {
@@ -88,6 +90,12 @@ public class SocketClient {
 			case TaskQryByID:
 				clientDto.setOperateType(OperateType.TaskQryByID);
 				return new TaskQueryByTaskIDDeal().deal(clientDto, objDtoList, in, out);
+			case ChangePwd:
+				clientDto.setOperateType(OperateType.ChangePwd);
+				return new ChangePwdDeal().deal(clientDto, objDtoList, in, out);
+			case CommitTask:
+				clientDto.setOperateType(OperateType.CommitTask);
+				return new CommitTaskDeal().deal(clientDto, objDtoList, in, out);
 			default:
 				break;
 			}

@@ -6,7 +6,7 @@ import com.coal.black.bc.socket.client.returndto.TaskQueryByTaskIDResult;
 
 public class TestTaskQueryByID {
 	public static void main(String[] args) {
-		ClientGlobal.userId = 11;
+		ClientGlobal.setUserId(11);
 		TaskQueryByTaskIDHandler handler = new TaskQueryByTaskIDHandler();
 		TaskQueryByTaskIDResult result = handler.qryTaskById(5);
 		if (result.isSuccess()) {

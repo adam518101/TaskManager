@@ -16,12 +16,12 @@ public class UserTaskStatusChangeHandler {
 		SocketClient client = new SocketClient();
 		List<IDtoBase> list = new ArrayList<IDtoBase>();
 		UserTaskStatusChangeDto dto = new UserTaskStatusChangeDto();
-		dto.setUserId(ClientGlobal.userId);
+		dto.setUserId(ClientGlobal.getUserId());
 		dto.setTaskId(taskId);
 		dto.setUserTaskStatus(userTaskStatus);
 		list.add(dto);
 
-		BasicResult basicResult = client.deal(OperateType.UserTaskStatusChange, ClientGlobal.userId, list, this);
+		BasicResult basicResult = client.deal(OperateType.UserTaskStatusChange, ClientGlobal.getUserId(), list, this);
 		if (basicResult instanceof UserTaskStatusChangeResult) {
 			return (UserTaskStatusChangeResult) basicResult;
 		} else {

@@ -19,7 +19,7 @@ public class TestSign {
 		UserLoginHandler userLogin = new UserLoginHandler();
 		LoginResult loginResult = userLogin.login("wanghui", "123456");
 		if (loginResult.isSuccess()) {
-			ClientGlobal.userId = loginResult.getUserId();
+			ClientGlobal.setUserId(loginResult.getUserId());
 
 			for (int i = 0; i < 10; i++) {
 				SignInDto signIn = new SignInDto();

@@ -18,7 +18,7 @@ public class TaskQueryHandler {
 		TaskQueryDto queryDto = new TaskQueryDto();
 		queryDto.setUserTaskStatus(userStatusList);
 		lists.add(queryDto);
-		BasicResult result = socketClient.deal(OperateType.TaskQuery, ClientGlobal.userId, lists, this);
+		BasicResult result = socketClient.deal(OperateType.TaskQuery, ClientGlobal.getUserId(), lists, this);
 		if (result instanceof TaskQueryResult) {
 			return (TaskQueryResult) result;
 		} else {

@@ -18,7 +18,7 @@ public class UserSignHandler {
 		for (SignInDto dto : signList) {
 			list.add(dto);
 		}
-		BasicResult basicResult = client.deal(OperateType.SingIn, ClientGlobal.userId, list, this);
+		BasicResult basicResult = client.deal(OperateType.SingIn, ClientGlobal.getUserId(), list, this);
 		if (basicResult instanceof SignInResult) {
 			return (SignInResult) basicResult;
 		} else {

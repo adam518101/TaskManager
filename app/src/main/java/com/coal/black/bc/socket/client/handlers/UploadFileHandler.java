@@ -19,7 +19,7 @@ public class UploadFileHandler {
 		SocketClient client = new SocketClient();
 		List<IDtoBase> list = new ArrayList<IDtoBase>();
 		list.add(uploadDto);
-		BasicResult result = client.deal(OperateType.UploadFile, ClientGlobal.userId, list, this);
+		BasicResult result = client.deal(OperateType.UploadFile, ClientGlobal.getUserId(), list, this);
 		if (result instanceof UploadFileResult) {
 			return (UploadFileResult) result;
 		} else {

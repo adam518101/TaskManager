@@ -36,7 +36,7 @@ public class LoginDeal {
 				byte[] userIdBytes = InputStreamUtils.readFixedLengthData(4, input);// 获取用户ID的字节数组
 				int userId = DataUtil.bytes2Int(userIdBytes);
 				if (userId > 0) {
-					ClientGlobal.userId = userId;
+					ClientGlobal.setUserId(userId);
 				}
 				loginResult.setSuccess(true);
 				loginResult.setBusException(false);

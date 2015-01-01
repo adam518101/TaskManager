@@ -6,11 +6,9 @@ import com.coal.black.bc.socket.client.returndto.TaskQryUserNewTaskCountResult;
 
 public class TestQryNewTaskCountHandler {
 	public static void main(String[] args) {
-		ClientGlobal.userId = 11;
+		ClientGlobal.setUserId(11);
 		TaskQryUserNewTaskHandler handler = new TaskQryUserNewTaskHandler();
-        long time = 1419923417454l;
-        System.out.println(time);
-        TaskQryUserNewTaskCountResult countResult = handler.qryNewTaskCount(time);
+		TaskQryUserNewTaskCountResult countResult = handler.qryNewTaskCount(1419657487665L);
 		if (countResult.isSuccess()) {
 			System.out.println("Success, result count is " + countResult.getCount());
 		} else {
