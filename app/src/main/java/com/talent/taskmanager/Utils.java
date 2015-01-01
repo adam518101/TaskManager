@@ -4,12 +4,17 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.coal.black.bc.socket.client.ClientGlobal;
+import com.coal.black.bc.socket.utils.CommonUtils;
 import com.talent.taskmanager.network.NetworkState;
 
 import java.text.SimpleDateFormat;
@@ -115,6 +120,25 @@ public class Utils {
         if (dialog != null && dialog.isShowing()) {
             dialog.dismiss();
         }
+    }
+
+    public static void getMACAddress(SharedPreferences preferences, Context context) {
+        //We get mac address if there is not one saved in preference.
+        if (preferences == null) {
+            preferences = context.getSharedPreferences(Constants.TASK_MANAGER, Context.MODE_PRIVATE);
+        }
+        String macAddress = preferences.getString(Constants.MAC_ADDRESS, null);
+        if (macAddress == null) {
+            //Get mac address from system and save it to preference.
+            WifiManager manager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+            WifiInfo info = manager.getConnectionInfo();
+            macAddress = info.getMacAddress();
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(Constants.MAC_ADDRESS, macAddress);
+            editor.apply();
+        }
+        ClientGlobal.macStr = macAddress;
+        ClientGlobal.macBytes = CommonUtils.macString2Bytes(macAddress);
     }
 
     /**

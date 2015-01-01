@@ -40,7 +40,7 @@ public class TaskManagerService extends Service {
 
     public static final int UPLOAD_FILE_QUERY_INTERVAL = 5; // every 5 min to query whether there is unfinished file.
     private static final String TASK_NOTIFICATION_SERVICE = "task_notification_service";
-    private static final int LOCATION_UPDATE_INTERVAL = 10; // every 5 minutes we update locations to database.
+    private static final int LOCATION_UPDATE_INTERVAL = 10; // every 10 minutes we update locations to database.
     private static final int NOTIFICATION_ID = 1;
     public static final int ONE_MINUTES = 60 * 1000;
     private NotificationManager mNotificationManager;
@@ -62,6 +62,7 @@ public class TaskManagerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         initVars();
+        Utils.getMACAddress(mPrefs, getApplicationContext());
         registerToTimeCount();
         acquireWakeLock();
         startRecordLocation();
@@ -181,6 +182,7 @@ public class TaskManagerService extends Service {
 
     private void updateLocationInformation() {
         if (mUpdateCountDown <= 0) {
+            mUpdateCountDown = LOCATION_UPDATE_INTERVAL;
             Log.d("acmllaugh1", "updateLocationInformation (line 169): start upload locations.");
             SignInDto dto = new SignInDto();
             Location location = mLocationManager.getCurrentLocation();
@@ -198,13 +200,13 @@ public class TaskManagerService extends Service {
             if (result.isSuccess()) {
                 mRecordedLocations.clear();
                 mLastUpdateSuccess = true;
-                mUpdateCountDown = LOCATION_UPDATE_INTERVAL;
                 Log.d("acmllaugh1", "updateLocationInformation (line 153): upload location information success.");
                 return;
             }else{
                 mLastUpdateSuccess = false;
                 mRecordedLocations.clear();
                 Log.d("acmllaugh1", "updateLocationInformation (line 155): upload location failed.");
+                Log.d("acmllaugh1", "update location fail id : " + result.getBusinessErrorCode());
             }
         }else{
             mUpdateCountDown--;

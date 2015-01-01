@@ -70,7 +70,7 @@ public class LoginActivity extends Activity {
         Utils.registerToEventBus(this);
         checkNetWorkConnected();
         if (!Constants.MAC_ADDRESS_DEBUG_FLAG) {
-            getMACAddress();
+            Utils.getMACAddress(mPrefs, getApplicationContext());
         }
         if (getSavedUserID() == -1) { // -1 means no saved user id was found.
             setContentView(R.layout.activity_login);
@@ -82,25 +82,6 @@ public class LoginActivity extends Activity {
         }
     }
 
-    private void getMACAddress() {
-        //We get mac address if there is not one saved in preference.
-        if (mPrefs == null) {
-            mPrefs = getSharedPreferences(Constants.TASK_MANAGER, MODE_PRIVATE);
-        }
-        String macAddress = mPrefs.getString(Constants.MAC_ADDRESS, null);
-        if (macAddress == null) {
-            //Get mac address from system and save it to preference.
-            WifiManager manager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-            WifiInfo info = manager.getConnectionInfo();
-            macAddress = info.getMacAddress();
-            SharedPreferences.Editor editor = mPrefs.edit();
-            editor.putString(Constants.MAC_ADDRESS, macAddress);
-            editor.apply();
-        }
-        ClientGlobal.macStr = macAddress;
-        ClientGlobal.macBytes = CommonUtils.macString2Bytes(macAddress);
-
-    }
 
     private boolean checkNetWorkConnected() {
         //Check if there is an available network
