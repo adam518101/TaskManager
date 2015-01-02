@@ -64,5 +64,9 @@
     <string name="sd_card_not_available">当前存储卡不可用，无法显示图片与声音文件！</string>
     <string name="image_upload_succeed">图片上传成功</string>
     <string name="audio_upload_succeed">录音文件上传成功</string>
+    <string name="change_password">修改密码</string>
+    <string name="current_password">当前密码</string>
+    <string name="new_password">新密码</string>
+    <string name="new_password_confirm">新密码确认</string>
 
 </resources>

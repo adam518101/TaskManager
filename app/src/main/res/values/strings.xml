@@ -65,5 +65,9 @@
     <string name="sd_card_not_available">SD card is not available, images and audios can not display.</string>
     <string name="image_upload_succeed">Image upload succeed.</string>
     <string name="audio_upload_succeed">Audio upload succeed.</string>
+    <string name="change_password">Change Password</string>
+    <string name="current_password">Current Password</string>
+    <string name="new_password">New Password</string>
+    <string name="new_password_confirm">New Password Confirm</string>
 
 </resources>
