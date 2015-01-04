@@ -334,7 +334,7 @@ public class TaskListActivity extends Activity {
         SignInDto dto = new SignInDto();
         double latitude, longitude;
         Location location = mLocationManager.getCurrentLocation();
-        if (location == null) {
+//        if (location == null) {
             // Use baidu SDK to get current location
             BDLocation baiduLocation = mBaiduLocationManager.getCurrentLocation();
             if (baiduLocation != null) {
@@ -353,11 +353,11 @@ public class TaskListActivity extends Activity {
                 });
                 return;
             }
-        } else {
-            latitude = location.getLatitude();
-            longitude = location.getLongitude();
-            Log.d("Chris", "Use original location: (" + latitude + ", " + longitude + ")");
-        }
+//        } else {
+//            latitude = location.getLatitude();
+//            longitude = location.getLongitude();
+//            Log.d("Chris", "Use original location: (" + latitude + ", " + longitude + ")");
+//        }
         dto.setLatitude(latitude);
         dto.setLongitude(longitude);
         dto.setTime(System.currentTimeMillis());

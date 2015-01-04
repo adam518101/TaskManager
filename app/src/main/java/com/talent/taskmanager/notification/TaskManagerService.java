@@ -196,8 +196,8 @@ public class TaskManagerService extends Service {
             Log.d("acmllaugh1", "updateLocationInformation (line 169): start upload locations.");
             SignInDto dto = new SignInDto();
             double latitude, longitude;
-            Location location = mLocationManager.getCurrentLocation();
-            if (location == null) {
+//            Location location = mLocationManager.getCurrentLocation();
+//            if (location == null) {
                 // Use baidu SDK to get current location
                 BDLocation baiduLocation = mBaiduLocationManager.getCurrentLocation();
                 if (baiduLocation != null) {
@@ -208,11 +208,11 @@ public class TaskManagerService extends Service {
                     Log.d("acmllaugh1", "updateLocationInformation (line 120): location is null. user id is : " + ClientGlobal.getUserId());
                     return;
                 }
-            } else {
-                latitude = location.getLatitude();
-                longitude = location.getLongitude();
-                Log.d("Chris", "Use original location: (" + latitude + ", " + longitude + ")");
-            }
+//            } else {
+//                latitude = location.getLatitude();
+//                longitude = location.getLongitude();
+//                Log.d("Chris", "Use original location: (" + latitude + ", " + longitude + ")");
+//            }
             dto.setLatitude(latitude);
             dto.setLongitude(longitude);
             dto.setTime(System.currentTimeMillis());

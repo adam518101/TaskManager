@@ -14,6 +14,12 @@ import com.baidu.location.LocationClientOption.LocationMode;
  */
 public class BaiduLocationManager {
     private static final String TAG = "BaiduLocationManager";
+    private static final LocationMode LOCATION_MODE = LocationMode.Hight_Accuracy;
+    // "gcj02": 国测局加密经纬度坐标
+    // "bd09ll": 百度加密经纬度坐标
+    // "bd09": 百度加密墨卡托坐标
+    private static final String COORDINATE_TYPE = "bd09ll";
+    private static final int UPDATE_FREQUENCY = 1000;
 
     private Context mContext;
     private boolean mRecordLocation;
@@ -57,9 +63,9 @@ public class BaiduLocationManager {
         mLocationClient = new LocationClient(mContext);
         mLocationListener = new LocationListener();
         LocationClientOption option = new LocationClientOption();
-        option.setLocationMode(LocationMode.Hight_Accuracy);
-        option.setCoorType("gcj02");
-        int span = 1000;
+        option.setLocationMode(LOCATION_MODE);
+        option.setCoorType(COORDINATE_TYPE);
+        int span = UPDATE_FREQUENCY;
         option.setScanSpan(span);
         option.setIsNeedAddress(true);
         mLocationClient.setLocOption(option);
